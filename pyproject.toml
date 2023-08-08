@@ -1,0 +1,35 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "pytest-tuitest"
+authors = [{name = "Milomir Babic (redant333)"}]
+license = {file = "LICENSE"}
+keywords = [
+  "pytest",
+  "tui",
+]
+classifiers = [
+  "Framework :: Pytest",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: MacOS :: MacOS X",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Utilities",
+]
+dependencies = [
+  "pytest>=7.4.0",
+  "pyte>=0.8.1",
+]
+dynamic = ["version", "description"]
+
+[project.urls]
+Home = "https://github.com/redant333/pytest-tuitest"
+Source = "https://github.com/redant333/pytest-tuitest"
+
+[project.entry-points.pytest11]
+pytest_tuitest = "pytest_tuitest.plugin"
