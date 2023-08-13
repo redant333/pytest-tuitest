@@ -6,7 +6,7 @@ def task_check():
     return {
         "verbosity": 2,
         "actions": [
-            "pre-commit run --all-files"
+            "pre-commit run --all-files --color=always"
         ]
     }
 
