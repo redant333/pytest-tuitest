@@ -16,17 +16,20 @@ class Process:
 
     def __init__(self,
                  executable: str,
-                 args: list[str],
+                 args: list[str] = None,
                  columns: int = 80,
                  lines: int = 24) -> None:
         """Initialize a Process object
 
         Args:
             executable (str): Executable to run. Must be either full path or present in path.
-            args (list[str]): List of arguments to send to the process.
+            args (list[str], optional): List of arguments to send to the process. If not provided
+                an empty list is used.
             columns (int, optional): Width of the pseudo terminal. Defaults to 80.
             lines (int, optional): Height of the pseudo terminal. Defaults to 24.
         """
+        if not args:
+            args = []
 
         self._lines = lines
         self._columns = columns
