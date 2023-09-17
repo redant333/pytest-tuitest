@@ -1,0 +1,4 @@
+[BASIC]
+# Rationale:
+# e - common name for exception in try/except
+good-names=e
