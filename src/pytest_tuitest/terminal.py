@@ -21,31 +21,6 @@ class Terminal:
         self._stream = pyte.ByteStream(self._screen)
         self._process = process
 
-    def get_char_at(self, line: int, column: int) -> str:
-        """Get the character at the given coordinates in the terminal.
-
-        Args:
-            line (int): Line from which to get the char (zero indexed)
-            column (int): Column from which to get the char (zero indexed)
-
-        Raises:
-            OutsideBounds: If the given coordinates are not inside the terminal.
-
-        Returns:
-            str: Character at the given coordinates. If nothing is present,
-                " " is returned.
-        """
-        line_outside = line < 0 or line >= self._process.lines
-        column_outside = column < 0 or column >= self._process.columns
-
-        if line_outside or column_outside:
-            msg = (f"Requested location ({line}, {column}) is outside "
-                   f"terminal with size {self._process.lines}x{self._process.columns}")
-            raise OutsideBounds(msg)
-
-        self._update_screen()
-        return self._screen.buffer[line][column].data
-
     def get_string_at(self, line: int, column: int, length: int) -> str:
         """Get the string of given length at the given coordiantes in the terminal.
 
