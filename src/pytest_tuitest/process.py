@@ -5,6 +5,7 @@ import os
 import pty
 import struct
 import termios
+from select import select
 
 
 class ProcessFinished(Exception):
@@ -86,6 +87,10 @@ class Process:
             raise ProcessFinished()
 
         return data
+
+    def wait_for_output(self) -> None:
+        """Block until new output is received from the executable."""
+        select([self._child_fd], [], [])
 
     @property
     def lines(self) -> int:

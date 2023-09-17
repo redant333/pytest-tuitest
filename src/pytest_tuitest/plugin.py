@@ -2,10 +2,12 @@
 
 import pytest
 
-from .terminal import Terminal
+from .terminal import Process, Terminal
 
 
 @pytest.fixture
 def terminal():
     """The main fixture that enables terminal interaction."""
-    return Terminal()
+    # Use a dummy executable for now
+    process = Process("sh", ["-c", "echo Works"])
+    return Terminal(process)

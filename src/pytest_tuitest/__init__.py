@@ -3,3 +3,4 @@
 __version__ = "0.1.0"
 
 from .process import Process, ProcessFinished
+from .terminal import OutsideBounds, Terminal
