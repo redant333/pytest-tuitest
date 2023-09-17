@@ -1,10 +1,10 @@
 """Classes for handling and communication with processes in pseudo terminals."""
 import errno
+import fcntl
+import os
+import pty
 import struct
 import termios
-import fcntl
-import pty
-import os
 
 
 class ProcessFinished(Exception):

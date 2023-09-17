@@ -1,6 +1,7 @@
 """The main plugin file containing all the fixtures."""
 
 import pytest
+
 from .terminal import Terminal
 
 

@@ -2,5 +2,4 @@
 
 __version__ = "0.1.0"
 
-from .process import Process
-from .process import ProcessFinished
+from .process import Process, ProcessFinished

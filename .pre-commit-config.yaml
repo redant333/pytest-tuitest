@@ -20,3 +20,8 @@ repos:
     rev: v2.0.2
     hooks:
       - id: autopep8
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
