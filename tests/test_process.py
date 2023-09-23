@@ -1,4 +1,6 @@
 """Tests for Process class."""
+import pytest
+
 from pytest_tuitest import Process, ProcessFinished
 
 
@@ -6,7 +8,7 @@ def get_all_output(process: Process) -> bytes:
     """Read the process output until it finishes.
 
     Args:
-        process (Process): The process whose output shoudl be read.
+        process (Process): The process whose output should be read.
 
     Returns:
         bytes: The read output.
@@ -69,3 +71,75 @@ class TestProcess:
 
         msg = f"Got terminal size {output}, expected {expected_output}"
         assert output == expected_output, msg
+
+    @pytest.mark.parametrize("exit_status", [0, 5])
+    def test_wait_for_finished_returns_correct_exit_status(self, exit_status):
+        """Verify that the exit status of the process is correctly captured."""
+        process = Process("sh", ["-c", f"exit {exit_status}"])
+
+        returned_status, _, _ = process.wait_for_finished()
+
+        msg = f"Expected exit status {exit_status}, got {returned_status}"
+        assert returned_status == exit_status, msg
+
+    def test_wait_for_finished_blocks_until_the_process_finishes(self):
+        """Verify that the exit status is reported as None if the process has not yet finished."""
+        exit_status = 3
+        process = Process("sh", ["-c", "sleep 1 && return 3"])
+
+        # This will be executed before the 1s elapses
+        returned_status, _, _ = process.wait_for_finished()
+
+        msg = f"Expected exit status {exit_status}, got {returned_status}"
+        assert returned_status == exit_status, msg
+
+    def test_wait_for_finished_returns_none_for_captured_stdout_when_not_requested(
+            self, test_scripts_dir):
+        """Verify that None is returned for stdout and stderr when they are not captured."""
+        outputs_script = test_scripts_dir / "outputs.sh"
+        process = Process(str(outputs_script))
+
+        exit_status, stdout, stderr = process.wait_for_finished()
+
+        msg = "Process failed unexpectedly while running outputs.sh"
+        assert exit_status == 0, msg
+
+        msg = f"Unexpected value {stdout} returned for uncaptured stdout"
+        assert stdout is None, msg
+
+        msg = f"Unexpected value {stderr} returned for uncaptured stderr"
+        assert stderr is None, msg
+
+    def test_wait_for_finished_stdout_correctly_captured_when_requested(self, test_scripts_dir):
+        """Verify that stdout is correctly captured when requested."""
+        outputs_script = test_scripts_dir / "outputs.sh"
+        process = Process(str(outputs_script), capture_stdout=True)
+
+        exit_status, stdout, stderr = process.wait_for_finished()
+
+        msg = "Process failed unexpectedly while running outputs.sh"
+        assert exit_status == 0, msg
+
+        expected = b"This goes to stdout\n"
+        msg = f"Unexpected value {stdout} returned for stdout, expected {expected}"
+        assert stdout == expected, msg
+
+        msg = f"Unexpected value {stderr} returned for uncaptured stderr"
+        assert stderr is None, msg
+
+    def test_wait_for_finished_stderr_correctly_captured_when_requested(self, test_scripts_dir):
+        """Verify that stderr is correctly captured when requested."""
+        outputs_script = test_scripts_dir / "outputs.sh"
+        process = Process(str(outputs_script), capture_stderr=True)
+
+        exit_status, stdout, stderr = process.wait_for_finished()
+
+        msg = "Process failed unexpectedly while running outputs.sh"
+        assert exit_status == 0, msg
+
+        msg = f"Unexpected value {stdout} returned for uncaptured stdout"
+        assert stdout is None, msg
+
+        expected = b"This goes to stderr\n"
+        msg = f"Unexpected value {stderr} returned for stderr, expected {expected}"
+        assert stderr == expected, msg
