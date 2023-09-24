@@ -66,6 +66,13 @@ class Terminal:
         """Block until new output is received from the process."""
         self._process.wait_for_output()
 
+    def wait_for_finished(self) -> tuple[int, bytes, bytes]:
+        """Block until the process finishes and return the information about it.
+
+        This is just a proxy method to wait_for_finished of the inner process.
+        """
+        return self._process.wait_for_finished()
+
     def _update_screen(self) -> None:
         """Refresh the internal knowledge about the process output."""
         while True:
