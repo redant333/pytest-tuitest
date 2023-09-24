@@ -143,3 +143,37 @@ class TestProcess:
         expected = b"This goes to stderr\n"
         msg = f"Unexpected value {stderr} returned for stderr, expected {expected}"
         assert stderr == expected, msg
+
+    # This will fail as long as pipes are used to buffer the captured stdout
+    @pytest.mark.xfail
+    def test_wait_for_finished_stdout_correctly_captured_for_long_output(self):
+        """Verify that stdout can be captured even if contains large amount of data."""
+        character_count = 1024 * 1024  # 1MiB
+        process = Process("bash",
+                          ["-c", f"yes | head -c {character_count}"],
+                          capture_stdout=True)
+
+        exit_status, stdout, _ = process.wait_for_finished()
+
+        msg = "Process failed unexpectedly"
+        assert exit_status == 0, msg
+
+        msg = f"Got {len(stdout)} bytes, expected {character_count}"
+        assert len(stdout) == character_count, msg
+
+    # This will fail as long as pipes are used to buffer the captured stdout
+    @pytest.mark.xfail
+    def test_wait_for_finished_stderr_correctly_captured_for_long_output(self):
+        """Verify that stdout can be captured even if contains large amount of data."""
+        character_count = 1024 * 1024  # 1MiB
+        process = Process("bash",
+                          ["-c", f"yes | head -c {character_count} >&2"],
+                          capture_stderr=True)
+
+        exit_status, _, stderr = process.wait_for_finished()
+
+        msg = "Process failed unexpectedly"
+        assert exit_status == 0, msg
+
+        msg = f"Got {len(stderr)} bytes, expected {character_count}"
+        assert len(stderr) == character_count, msg
