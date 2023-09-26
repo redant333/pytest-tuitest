@@ -25,7 +25,7 @@ _PYTE_TO_COLOR_NAMED_MAP = {
     "brightblack": ColorNamed.BRIGHT_BLACK,
     "brightred": ColorNamed.BRIGHT_RED,
     "brightgreen": ColorNamed.BRIGHT_GREEN,
-    "brightbrown": ColorNamed.BRIGHT_BROWN,
+    "brightbrown": ColorNamed.BRIGHT_YELLOW,
     "brightblue": ColorNamed.BRIGHT_BLUE,
     "brightmagenta": ColorNamed.BRIGHT_MAGENTA,
     # pyte typo for background colors

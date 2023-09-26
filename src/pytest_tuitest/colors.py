@@ -15,7 +15,7 @@ class ColorNamed(Enum):
     BRIGHT_BLACK = auto()
     BRIGHT_RED = auto()
     BRIGHT_GREEN = auto()
-    BRIGHT_BROWN = auto()
+    BRIGHT_YELLOW = auto()
     BRIGHT_BLUE = auto()
     BRIGHT_MAGENTA = auto()
     BRIGHT_CYAN = auto()
