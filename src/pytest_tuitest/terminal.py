@@ -28,6 +28,8 @@ _PYTE_TO_COLOR_NAMED_MAP = {
     "brightbrown": ColorNamed.BRIGHT_BROWN,
     "brightblue": ColorNamed.BRIGHT_BLUE,
     "brightmagenta": ColorNamed.BRIGHT_MAGENTA,
+    # pyte typo for background colors
+    "bfightmagenta": ColorNamed.BRIGHT_MAGENTA,
     "brightcyan": ColorNamed.BRIGHT_CYAN,
     "brightwhite": ColorNamed.BRIGHT_WHITE,
     "default": ColorNamed.DEFAULT,
@@ -98,13 +100,25 @@ class Terminal:
         Returns:
             ColorNamed: Color at the given coordinates.
         """
-        self._update_screen()
+        pyte_color = self._get_attribute_at(line, column, "fg")
 
-        msg = (f"Coordinates ({line}, {column}) are invalid for terminal size"
-               f" {self._process.lines}x{self._process.columns}")
-        self._raise_if_outside_bounds(line, column, msg)
+        if pyte_color not in _PYTE_TO_COLOR_NAMED_MAP:
+            msg = f"Could not decode color at ({line}, {column})"
+            raise UnsupportedColor(msg)
 
-        pyte_color = self._screen.buffer[line][column].fg
+        return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
+
+    def get_background_at(self, line: int, column: int) -> ColorNamed:
+        """Get the background color at given coordinates.
+
+        Args:
+            line (int): The line at which to get the color.
+            column (int): The column at which to get the color.
+
+        Returns:
+            ColorNamed: Color at the given coordinates.
+        """
+        pyte_color = self._get_attribute_at(line, column, "bg")
 
         if pyte_color not in _PYTE_TO_COLOR_NAMED_MAP:
             msg = f"Could not decode color at ({line}, {column})"
@@ -136,10 +150,20 @@ class Terminal:
             except ProcessFinished:
                 break
 
-    def _raise_if_outside_bounds(self, line, column, msg) -> None:
+    def _raise_if_outside_bounds(self, line: int, column: int, msg: str) -> None:
         """Raise OutsideBounds exception if given coordinates are not inside the terminal."""
         if line < 0 or line >= self._process.lines:
             raise OutsideBounds(msg)
 
         if column < 0 or column >= self._process.columns:
             raise OutsideBounds(msg)
+
+    def _get_attribute_at(self, line: int, column: int, attribute: str) -> object:
+        """Get the provided pyte buffer attribute at the given coordinates."""
+        self._update_screen()
+
+        msg = (f"Coordinates ({line}, {column}) are invalid for terminal size"
+               f" {self._process.lines}x{self._process.columns}")
+        self._raise_if_outside_bounds(line, column, msg)
+
+        return getattr(self._screen.buffer[line][column], attribute)
