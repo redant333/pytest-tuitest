@@ -1,7 +1,8 @@
 """Tests for Terminal class."""
 import pytest
 
-from pytest_tuitest import OutsideBounds, Process, Terminal
+from pytest_tuitest import (ColorNamed, OutsideBounds, Process, Terminal,
+                            UnsupportedColor)
 
 
 @pytest.fixture(name="terminal")
@@ -103,3 +104,62 @@ class TestWaitForFinished:
 
         msg = f"Got '{stderr}' as stderr, expected None"
         assert stderr is None, msg
+
+
+class TestGetForegroundAt:
+    """Tests for Terminal.get_foreground_at."""
+
+    @pytest.mark.parametrize("terminal", [{"executable": "all_16_colors.sh"}], indirect=True)
+    @pytest.mark.parametrize("line, expected_color", [
+        (0, ColorNamed.BLACK),
+        (1, ColorNamed.RED),
+        (2, ColorNamed.GREEN),
+        (3, ColorNamed.YELLOW),
+        (4, ColorNamed.BLUE),
+        (5, ColorNamed.MAGENTA),
+        (6, ColorNamed.CYAN),
+        (7, ColorNamed.WHITE),
+        (8, ColorNamed.BRIGHT_BLACK),
+        (9, ColorNamed.BRIGHT_RED),
+        (10, ColorNamed.BRIGHT_GREEN),
+        (11, ColorNamed.BRIGHT_BROWN),
+        (12, ColorNamed.BRIGHT_BLUE),
+        (13, ColorNamed.BRIGHT_MAGENTA),
+        (14, ColorNamed.BRIGHT_CYAN),
+        (15, ColorNamed.BRIGHT_WHITE),
+        (16, ColorNamed.DEFAULT),
+    ])
+    def test_returns_correct_16_color(self, terminal, line, expected_color):
+        """Verify that foreground color is returned as expected."""
+        terminal.wait_for_output()
+
+        color = terminal.get_foreground_at(line, 0)
+
+        assert color == expected_color
+
+    @pytest.mark.parametrize("terminal", [{"executable": "colors.sh"}], indirect=True)
+    def test_raises_exception_for_256_color(self, terminal):
+        """Verify that an exception is raised when getting a color from 256 color set.
+
+        Currently, only colors from 16 color set are supported.
+        """
+        terminal.wait_for_output()
+
+        with pytest.raises(UnsupportedColor):
+            terminal.get_foreground_at(7, 0)
+
+    @pytest.mark.parametrize("terminal",
+                             [{"executable": "colors.sh", "lines": 10, "columns": 10}],
+                             indirect=True)
+    @pytest.mark.parametrize("line, column", [
+        (5, 10),
+        (10, 5),
+        (10, 10),
+        (-1, 5),
+        (5, -1),
+        (-1, -1),
+    ])
+    def test_raises_exception_for_coordinates_outside_bounds(self, terminal, line, column):
+        """Verify that an exception is raised for coordinates outside the terminal."""
+        with pytest.raises(OutsideBounds):
+            terminal.get_foreground_at(line, column)

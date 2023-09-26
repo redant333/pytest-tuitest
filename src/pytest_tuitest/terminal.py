@@ -1,11 +1,37 @@
 """Module for virtual terminal interaction."""
 import pyte
 
+from .colors import ColorNamed
 from .process import Process, ProcessFinished
 
 
 class OutsideBounds(Exception):
     """Raised when information is requested for invalid coordinates."""
+
+
+class UnsupportedColor(Exception):
+    """Raised when a color cannot be decoded."""
+
+
+_PYTE_TO_COLOR_NAMED_MAP = {
+    "black": ColorNamed.BLACK,
+    "red": ColorNamed.RED,
+    "green": ColorNamed.GREEN,
+    "brown": ColorNamed.YELLOW,
+    "blue": ColorNamed.BLUE,
+    "magenta": ColorNamed.MAGENTA,
+    "cyan": ColorNamed.CYAN,
+    "white": ColorNamed.WHITE,
+    "brightblack": ColorNamed.BRIGHT_BLACK,
+    "brightred": ColorNamed.BRIGHT_RED,
+    "brightgreen": ColorNamed.BRIGHT_GREEN,
+    "brightbrown": ColorNamed.BRIGHT_BROWN,
+    "brightblue": ColorNamed.BRIGHT_BLUE,
+    "brightmagenta": ColorNamed.BRIGHT_MAGENTA,
+    "brightcyan": ColorNamed.BRIGHT_CYAN,
+    "brightwhite": ColorNamed.BRIGHT_WHITE,
+    "default": ColorNamed.DEFAULT,
+}
 
 
 class Terminal:
@@ -62,6 +88,30 @@ class Terminal:
 
         return "".join(chars)
 
+    def get_foreground_at(self, line: int, column: int) -> ColorNamed:
+        """Get the foreground color at given coordinates.
+
+        Args:
+            line (int): The line at which to get the color.
+            column (int): The column at which to get the color.
+
+        Returns:
+            ColorNamed: Color at the given coordinates.
+        """
+        self._update_screen()
+
+        msg = (f"Coordinates ({line}, {column}) are invalid for terminal size"
+               f" {self._process.lines}x{self._process.columns}")
+        self._raise_if_outside_bounds(line, column, msg)
+
+        pyte_color = self._screen.buffer[line][column].fg
+
+        if pyte_color not in _PYTE_TO_COLOR_NAMED_MAP:
+            msg = f"Could not decode color at ({line}, {column})"
+            raise UnsupportedColor(msg)
+
+        return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
+
     def wait_for_output(self) -> None:
         """Block until new output is received from the process."""
         self._process.wait_for_output()
@@ -85,3 +135,11 @@ class Terminal:
                 self._stream.feed(data)
             except ProcessFinished:
                 break
+
+    def _raise_if_outside_bounds(self, line, column, msg) -> None:
+        """Raise OutsideBounds exception if given coordinates are not inside the terminal."""
+        if line < 0 or line >= self._process.lines:
+            raise OutsideBounds(msg)
+
+        if column < 0 or column >= self._process.columns:
+            raise OutsideBounds(msg)
