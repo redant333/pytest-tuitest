@@ -1,4 +1,6 @@
 """Module for virtual terminal interaction."""
+import time
+
 import pyte
 
 from .colors import ColorNamed
@@ -11,6 +13,10 @@ class OutsideBounds(Exception):
 
 class UnsupportedColor(Exception):
     """Raised when a color cannot be decoded."""
+
+
+class TimedOut(Exception):
+    """Raised when an operation times out."""
 
 
 _PYTE_TO_COLOR_NAMED_MAP = {
@@ -48,6 +54,7 @@ class Terminal:
         self._screen = pyte.Screen(process.columns, process.lines)
         self._stream = pyte.ByteStream(self._screen)
         self._process = process
+        self._process_running = True
 
     def get_string_at(self, line: int, column: int, length: int) -> str:
         """Get the string of given length at the given coordiantes in the terminal.
@@ -137,9 +144,50 @@ class Terminal:
         """
         return self._process.wait_for_finished()
 
+    def wait_for_stable_output(self, stable_time_sec=0.1, max_wait_sec=5) -> None:
+        """Wait for the terminal output to stabilize for at least stable_time_sec.
+
+        Useful for making sure operations that produce multiple lines are fully
+        finished before continuing.
+
+        Args:
+            stable_time_sec (float, optional): The terminal is considered stable
+                after it remains unchanged for this amount of time. Defaults to 0.1.
+            max_wait_sec (int, optional): Maximum amount of time to wait for the
+                terminal to become stable. Defaults to 5.
+
+        Raises:
+            TimedOut: When the terminal doesn't stabilize within max_wait_sec.
+        """
+        self._update_screen()
+        started = time.time()
+        last_update = time.time()
+
+        def should_poll():
+            # Nothing is going to change if the process has finished
+            if not self._process_running:
+                return False
+
+            now = time.time()
+            elapsed_from_update = now - last_update
+            if elapsed_from_update >= stable_time_sec:
+                return False
+
+            elapsed_from_start = now - started
+            if elapsed_from_start > max_wait_sec:
+                raise TimedOut()
+
+            return True
+
+        while should_poll():
+            output_received = self._process.wait_for_output(timeout_sec=0.01)
+            if output_received:
+                self._update_screen()
+                last_update = time.time()
+
     def _update_screen(self) -> None:
         """Refresh the internal knowledge about the process output."""
-        while True:
+        while self._process_running:
             try:
                 data = self._process.get_new_output()
 
@@ -148,6 +196,7 @@ class Terminal:
 
                 self._stream.feed(data)
             except ProcessFinished:
+                self._process_running = False
                 break
 
     def _raise_if_outside_bounds(self, line: int, column: int, msg: str) -> None:

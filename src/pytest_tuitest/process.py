@@ -150,9 +150,19 @@ class Process:  # pylint: disable=too-many-instance-attributes
 
         return data
 
-    def wait_for_output(self) -> None:
-        """Block until new output is received from the executable."""
-        select([self._child_fd], [], [])
+    def wait_for_output(self, timeout_sec: float = None) -> bool:
+        """Block until new output is received from the executable.
+
+        Args:
+            timeout_sec (float, optional): If provided, maximuma amount of time
+            to wait for new output. Defaults to None.
+
+        Returns:
+            bool: True if new output has been received, False otherwise. Note that
+                this method can only return True if timeout_sec is not given.
+        """
+        readable, _, _ = select([self._child_fd], [], [], timeout_sec)
+        return bool(readable)
 
     def wait_for_finished(self) -> tuple[int, bytes, bytes]:
         """Block until the process finishes and return the information about it.

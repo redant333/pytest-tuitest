@@ -4,4 +4,4 @@ __version__ = "0.1.0"
 
 from .colors import ColorNamed
 from .process import Process, ProcessFinished
-from .terminal import OutsideBounds, Terminal, UnsupportedColor
+from .terminal import OutsideBounds, Terminal, TimedOut, UnsupportedColor

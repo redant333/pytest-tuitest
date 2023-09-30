@@ -1,8 +1,10 @@
 """Tests for Terminal class."""
+import time
+
 import pytest
 
 from pytest_tuitest import (ColorNamed, OutsideBounds, Process, Terminal,
-                            UnsupportedColor)
+                            TimedOut, UnsupportedColor)
 
 
 @pytest.fixture(name="terminal")
@@ -222,3 +224,61 @@ class TestGetBackgroundAt:
         """Verify that an exception is raised for coordinates outside the terminal."""
         with pytest.raises(OutsideBounds):
             terminal.get_background_at(line, column)
+
+
+class TestWaitForStableOutput:
+    """Tests for Terminal.wait_for_stable_output."""
+    @pytest.mark.parametrize("terminal", [{"executable": "reversing_echo.sh"}], indirect=True)
+    def test_waits_at_least_given_number_of_seconds_for_running_process(self, terminal):
+        """Verify that it takes at least stable_time to determine that the output is stable."""
+        stable_time = 2
+
+        before = time.time()
+        terminal.wait_for_stable_output(stable_time)
+        after = time.time()
+
+        time_elapsed = after - before
+        tolerance_sec = 0.01  # Slight difference is expected
+
+        msg = f"Expected to take {stable_time}s, actually took {time_elapsed}s"
+        assert time_elapsed == pytest.approx(
+            stable_time, rel=tolerance_sec), msg
+
+    @pytest.mark.parametrize("terminal", [{"executable": "spammy.sh"}], indirect=True)
+    def test_raises_an_exception_if_terminal_does_not_stabilize(self, terminal):
+        """Verify that an exception is raised if the terminal does not stabilize."""
+        max_wait_time = 3
+
+        before = time.time()
+
+        with pytest.raises(TimedOut):
+            terminal.wait_for_stable_output(max_wait_sec=max_wait_time)
+
+        after = time.time()
+
+        time_elapsed = after - before
+        tolerance_sec = 0.01  # Slight difference is expected
+
+        msg = f"Expected to time out after {max_wait_time}, timed out after {time_elapsed}"
+        assert time_elapsed == pytest.approx(
+            max_wait_time, rel=tolerance_sec), msg
+
+    @pytest.mark.parametrize("terminal", [{"executable": "colors.sh"}], indirect=True)
+    def test_returns_instantly_for_a_finished_process(self, terminal):
+        """Verify that finished process is considered already stable.
+
+        This means the method returns immediately.
+        """
+        stable_time = 2
+
+        terminal.wait_for_output()
+
+        before = time.time()
+        terminal.wait_for_stable_output(stable_time)
+        after = time.time()
+
+        time_elapsed = after - before
+        very_short = 0.01
+
+        msg = f"Expected to return immediately, actually took {time_elapsed}s"
+        assert time_elapsed < very_short, msg
