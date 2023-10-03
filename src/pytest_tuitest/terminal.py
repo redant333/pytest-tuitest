@@ -185,6 +185,15 @@ class Terminal:
                 self._update_screen()
                 last_update = time.time()
 
+    def send(self, characters: str) -> None:
+        """Send the provided characters to the process's stdin.
+
+        Args:
+            characters (str): The characters to send.
+        """
+        encoded = characters.encode()
+        self._process.write(encoded)
+
     def _update_screen(self) -> None:
         """Refresh the internal knowledge about the process output."""
         while self._process_running:

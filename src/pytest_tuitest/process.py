@@ -150,6 +150,14 @@ class Process:  # pylint: disable=too-many-instance-attributes
 
         return data
 
+    def write(self, bytes_to_write: bytes) -> None:
+        """Write the provided bytes to the process's stdin.
+
+        Args:
+            bytes_to_write (bytes): The bytes to write.
+        """
+        os.write(self._child_fd, bytes_to_write)
+
     def wait_for_output(self, timeout_sec: float = None) -> bool:
         """Block until new output is received from the executable.
 

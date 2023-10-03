@@ -6,6 +6,10 @@ import pytest
 from pytest_tuitest import (ColorNamed, OutsideBounds, Process, Terminal,
                             TimedOut, UnsupportedColor)
 
+# These are test classes. There use is only for organization so the
+# number of public methods does not matter.
+# pylint: disable=too-few-public-methods
+
 
 @pytest.fixture(name="terminal")
 def create_terminal(request, test_scripts_dir) -> Terminal:
@@ -282,3 +286,22 @@ class TestWaitForStableOutput:
 
         msg = f"Expected to return immediately, actually took {time_elapsed}s"
         assert time_elapsed < very_short, msg
+
+
+class TestSend:
+    """Tests for Terminal.send."""
+
+    @pytest.mark.parametrize("terminal", [{"executable": "reversing_echo.sh"}], indirect=True)
+    def test_successfully_interacts_with_terminal(self, terminal):
+        """Verify that it's possible to send a simple line to the terminal stdin."""
+        text_to_enter = "stuff"
+        expected_echo = "ffuts"
+
+        terminal.send(text_to_enter + "\n")
+        terminal.wait_for_stable_output()
+
+        string = terminal.get_string_at(0, 0, len(text_to_enter))
+        assert string == text_to_enter, f"Could not get the entered text, got '{string}'"
+
+        string = terminal.get_string_at(1, 0, len(expected_echo))
+        assert string == expected_echo, f"Could not get the echo, got '{string}'"
