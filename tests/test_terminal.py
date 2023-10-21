@@ -23,10 +23,15 @@ def create_terminal(request, test_scripts_dir) -> Terminal:
     executable = test_scripts_dir / request.param["executable"]
     lines = request.param.get("lines", 24)
     columns = request.param.get("columns", 80)
+
+    stdin = request.param.get("stdin", None)
+    if stdin:
+        stdin = stdin.encode()
     capture_stdout = request.param.get("capture_stdout", False)
     capture_stderr = request.param.get("capture_stderr", False)
+    args = request.param.get("args", [])
 
-    process = Process(str(executable), columns=columns, lines=lines,
+    process = Process(str(executable), args=args, columns=columns, lines=lines, stdin=stdin,
                       capture_stdout=capture_stdout, capture_stderr=capture_stderr)
     return Terminal(process)
 
@@ -305,3 +310,31 @@ class TestSend:
 
         string = terminal.get_string_at(1, 0, len(expected_echo))
         assert string == expected_echo, f"Could not get the echo, got '{string}'"
+
+
+class TestStdin:
+    """Tests for interaction with Process with piped stdin."""
+    @pytest.mark.parametrize("terminal", [{"executable": "run_command.sh",
+                                           "args": ["less"],
+                                           "stdin": "things\nstuff"}],
+                             indirect=True)
+    def test_interaction_with_specified_stdin(self, terminal):
+        """Verify the interaction with the underlying process is possible with specified stdin.
+
+        Specifying stdin should not prevent the process from reading /dev/tty.
+        """
+        first_line = "things"
+        second_line = "stuff"
+
+        terminal.wait_for_stable_output()
+
+        msg = "Top line before search not as expected"
+        assert terminal.get_string_at(0, 0, len(first_line)) == first_line, msg
+
+        # Initiate a search in less that will bring the second line to the top
+        terminal.send(f"/{second_line}\n")
+        terminal.wait_for_stable_output()
+
+        msg = "Top line after search not as expected"
+        top_line = terminal.get_string_at(0, 0, len(second_line))
+        assert top_line == second_line, msg

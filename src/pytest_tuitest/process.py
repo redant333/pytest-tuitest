@@ -25,6 +25,7 @@ class Process:  # pylint: disable=too-many-instance-attributes
                  args: list[str] = None,
                  columns: int = 80,
                  lines: int = 24,
+                 stdin: bytes = None,
                  capture_stdout: bool = False,
                  capture_stderr: bool = False) -> None:
         """Initialize a Process object
@@ -39,6 +40,8 @@ class Process:  # pylint: disable=too-many-instance-attributes
                 as part of get_new_output and will be captured instead. The captured output will
                 be available once the process finishes. See wait_for_finished.
                 Useful for testing applications that write on /dev/tty.
+            stdin: The stdin to pipe to the process. Note that this not prevent the process from
+                reading from /dev/tty.
             capture_stderr (bool, optional): If this is set to true, stderr will not be returned
                 as part of get_new_output and will be captured instead. The captured output will
                 be available once the process finishes. See wait_for_finished.
@@ -74,6 +77,12 @@ class Process:  # pylint: disable=too-many-instance-attributes
                 "COLUMNS": str(columns),
                 "LINES": str(lines),
             }
+
+            if stdin is not None:
+                stdin_r, stdin_w = os.pipe()
+                os.write(stdin_w, stdin)
+                os.dup2(stdin_r, 0)
+                os.close(stdin_w)
 
             if self._child_stdout_r is not None:
                 os.close(self._child_stdout_r)

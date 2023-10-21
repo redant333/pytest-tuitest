@@ -177,3 +177,25 @@ class TestProcess:
 
         msg = f"Got {len(stderr)} bytes, expected {character_count}"
         assert len(stderr) == character_count, msg
+
+    def test_specified_stdin_is_correctly_delivered_to_the_process(self):
+        """Verify that the specified stdin is piped into the executable."""
+        stdin = b"this is a test"
+        process = Process("wc", ["-c"], stdin=stdin)
+
+        output = get_all_output(process)
+
+        expected_output = f"{len(stdin)}\r\n".encode()
+        msg = f"Got output {output}, expected {expected_output}"
+        assert output == expected_output, msg
+
+    def test_eof_in_stdin_can_be_detected(self):
+        """Verify that the process detects EOF in the delivered stdin.
+
+        Command cat will not finish if it does not detect EOF.
+        """
+        stdin = b"test"
+        process = Process("cat", stdin=stdin)
+        exit_code, _, _ = process.wait_for_finished()
+
+        assert exit_code == 0, "Process failed unexpectedly"
