@@ -225,3 +225,15 @@ class Terminal:
         self._raise_if_outside_bounds(line, column, msg)
 
         return getattr(self._screen.buffer[line][column], attribute)
+
+    def _dump(self):
+        """Dump the contents of the terminal.
+
+        Currently used for debugging purposes.
+        """
+        self._update_screen()
+        print()
+        print('-' * self._process.columns)
+        print(*self._screen.display, sep='\n')
+        print('-' * self._process.columns)
+        print()
