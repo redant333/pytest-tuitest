@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+pytest_plugins = ["pytester"]
+
 
 @pytest.fixture
 def test_scripts_dir(request) -> Path:
