@@ -29,6 +29,27 @@ def test_executable_can_be_specified_with_decorator(pytester):
     result.assert_outcomes(passed=2)
 
 
+def test_multiple_executables_can_be_specified_through_parametrization(pytester):
+    """Verify that the executable can be specified through @pytest.mark.parametrize."""
+    pytester.makepyfile(
+        f"""
+        import pytest
+
+        @pytest.mark.parametrize("tuitest_executable", indirect=True, argvalues=[
+            "{TEST_SCRIPTS}/executable1.sh",
+            "{TEST_SCRIPTS}/executable2.sh",
+        ])
+        def test_parametrized_executable(terminal):
+            terminal.wait_for_output()
+            executable_number = terminal.get_string_at(0, 0, 1)
+
+            assert executable_number in ["1", "2"]
+        """)
+
+    result = pytester.runpytest()
+    result.assert_outcomes(passed=2)
+
+
 def test_not_specifying_executable_results_in_error(pytester):
     """Verify that not specifying the executable results in an error."""
     pytester.makepyfile(
@@ -91,3 +112,26 @@ def test_arguments_can_be_specified_with_decorator(pytester):
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=1)
+
+
+def test_multiple_argument_sets_can_be_specified_through_parametrization(pytester):
+    """Verify that arguments can be specified through @pytest.mark.parametrize."""
+    pytester.makepyfile(
+        f"""
+        import pytest
+        import pytest_tuitest as tt
+
+        @tt.test_executable("{TEST_SCRIPTS}/run_command.sh")
+        @pytest.mark.parametrize("tuitest_arguments", indirect=True, argvalues=[
+            ["echo", "1"],
+            ["echo", "2"],
+        ])
+        def test_arguments(terminal):
+            terminal.wait_for_output()
+            output = terminal.get_string_at(0, 0, 1)
+
+            assert output in ["1", "2"]
+        """)
+
+    result = pytester.runpytest()
+    result.assert_outcomes(passed=2)

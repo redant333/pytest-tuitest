@@ -19,17 +19,27 @@ def pytest_addoption(parser):
 class TuitestSetupException(Exception):
     """Raised when terminal fixture cannot be created."""
 
+###############################################################################
+# Fixtures
+###############################################################################
+
 
 @pytest.fixture
-def terminal(_tuitest_executable, _tuitest_arguments):
+def terminal(tuitest_executable, tuitest_arguments):
     """The main fixture that enables terminal interaction."""
-    process = Process(executable=_tuitest_executable, args=_tuitest_arguments)
+    process = Process(executable=tuitest_executable, args=tuitest_arguments)
     return Terminal(process)
 
 
-@pytest.fixture
-def _tuitest_executable(request):
-    """Proxy fixture that enables setting the executable in terminal fixture."""
+@pytest.fixture(name="tuitest_executable")
+def fixture_tuitest_executable(request):
+    """Fixture that defines the executable used in terminal fixture.
+
+    It can be parametrized by using test_executable decorator or @pytest.mark.parametrize
+    with indirect flag. If it's not parametrized, it will return the value of ini parameter
+    tuitest_default_executable. If tuitest_default_executable is not defined, it raises an
+    exception.
+    """
     if hasattr(request, "param") and request.param:
         return request.param
 
@@ -41,20 +51,28 @@ def _tuitest_executable(request):
     raise TuitestSetupException(msg)
 
 
-def test_executable(executable):
-    """Decorator that enables setting the executable in terminal fixture."""
-    return pytest.mark.parametrize("_tuitest_executable", [executable], indirect=True)
+@pytest.fixture(name="tuitest_arguments")
+def fixture_tuitest_arguments(request):
+    """Fixture that defines the arguments sent to the executable used in terminal fixture.
 
-
-@pytest.fixture
-def _tuitest_arguments(request):
-    """Proxy fixture that enables setting the arguments of the executable in terminal fixture."""
+    It can be parametrized by using with_arguments decorator or @pytest.mark.parametrize
+    with indirect flag. If it's not parametrized, an empty argument list is used.
+    """
     if hasattr(request, "param"):
         return request.param
 
     return None
 
+###############################################################################
+# Decorators
+###############################################################################
+
+
+def test_executable(executable):
+    """Decorator that enables setting the executable used in terminal fixture."""
+    return pytest.mark.parametrize("tuitest_executable", [executable], indirect=True)
+
 
 def with_arguments(args):
     """Decorator that enables setting the executable arguments used in terminal fixture."""
-    return pytest.mark.parametrize("_tuitest_arguments", [args], indirect=True)
+    return pytest.mark.parametrize("tuitest_arguments", [args], indirect=True)
