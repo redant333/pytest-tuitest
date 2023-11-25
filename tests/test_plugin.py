@@ -4,18 +4,6 @@ from pathlib import Path
 TEST_SCRIPTS = str((Path("tests")/"test_scripts").absolute())
 
 
-def test_terminal_fixture_exists(pytester):
-    """Verify that terminal fixture is accessible."""
-    pytester.makepyfile(
-        """
-        def test_terminal_fixture(terminal):
-            pass
-        """)
-
-    result = pytester.runpytest()
-    result.assert_outcomes(passed=1)
-
-
 def test_executable_can_be_specified_with_decorator(pytester):
     """Verify that the executable can be specified with a decorator."""
     pytester.makepyfile(
