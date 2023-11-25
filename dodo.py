@@ -21,7 +21,7 @@ def task_test():
     return {
         "verbosity": 2,
         "actions": [
-            "pytest --color=yes -s tests {additional_args}"
+            "pytest --color=yes tests {additional_args}"
         ],
         "pos_arg": "additional_args",
     }
