@@ -21,9 +21,9 @@ class TuitestSetupException(Exception):
 
 
 @pytest.fixture
-def terminal(_tuitest_executable):
+def terminal(_tuitest_executable, _tuitest_arguments):
     """The main fixture that enables terminal interaction."""
-    process = Process(_tuitest_executable)
+    process = Process(executable=_tuitest_executable, args=_tuitest_arguments)
     return Terminal(process)
 
 
@@ -44,3 +44,17 @@ def _tuitest_executable(request):
 def test_executable(executable):
     """Decorator that enables setting the executable in terminal fixture."""
     return pytest.mark.parametrize("_tuitest_executable", [executable], indirect=True)
+
+
+@pytest.fixture
+def _tuitest_arguments(request):
+    """Proxy fixture that enables setting the arguments of the executable in terminal fixture."""
+    if hasattr(request, "param"):
+        return request.param
+
+    return None
+
+
+def with_arguments(args):
+    """Decorator that enables setting the executable arguments used in terminal fixture."""
+    return pytest.mark.parametrize("_tuitest_arguments", [args], indirect=True)

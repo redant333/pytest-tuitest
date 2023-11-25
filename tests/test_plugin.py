@@ -72,3 +72,22 @@ def test_ini_executable_is_used_when_executable_not_provided(pytester):
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=2)
+
+
+def test_arguments_can_be_specified_with_decorator(pytester):
+    """Verify that executable arguments can be specified with decorator."""
+    pytester.makepyfile(
+        f"""
+        import pytest_tuitest as tt
+
+        @tt.test_executable("{TEST_SCRIPTS}/run_command.sh")
+        @tt.with_arguments(["echo", "x"])
+        def test_arguments(terminal):
+            terminal.wait_for_output()
+            output = terminal.get_string_at(0, 0, 1)
+
+            assert output == "x"
+        """)
+
+    result = pytester.runpytest()
+    result.assert_outcomes(passed=1)

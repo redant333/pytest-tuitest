@@ -3,6 +3,6 @@
 __version__ = "0.1.0"
 
 from .colors import ColorNamed
-from .plugin import test_executable
+from .plugin import test_executable, with_arguments
 from .process import Process, ProcessFinished
 from .terminal import OutsideBounds, Terminal, TimedOut, UnsupportedColor
