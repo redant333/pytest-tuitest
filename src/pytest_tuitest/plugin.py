@@ -4,16 +4,29 @@ import pytest
 
 from .terminal import Process, Terminal
 
-_EXECUTABLE_PARAM = "tuitest_default_executable"
+_EXECUTABLE_PARAM = "tuitest-default-executable"
+
+
+def addoption_executable(parser):
+    """Add ini and command line options for specifying default executable."""
+    help_text = "Executable to be used for tests when the executable it isn't explicitly specified."
+
+    parser.addini(
+        name=_EXECUTABLE_PARAM,
+        type="string",
+        help=help_text,
+    )
+
+    parser.addoption(
+        f"--{_EXECUTABLE_PARAM}",
+        dest=_EXECUTABLE_PARAM,
+        help=help_text,
+    )
 
 
 def pytest_addoption(parser):
     """Add tuitest-specific options."""
-    parser.addini(
-        name=_EXECUTABLE_PARAM,
-        type="string",
-        help="Executable to be used for tests when the executable it isn't explicitly specified."
-    )
+    addoption_executable(parser)
 
 
 class TuitestSetupException(Exception):
@@ -42,6 +55,9 @@ def fixture_tuitest_executable(request):
     """
     if hasattr(request, "param") and request.param:
         return request.param
+
+    if cli_executable := request.config.getoption(_EXECUTABLE_PARAM, default=None):
+        return cli_executable
 
     if ini_executable := request.config.getini(_EXECUTABLE_PARAM):
         return ini_executable
