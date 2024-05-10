@@ -113,10 +113,14 @@ def with_arguments(args):
     return pytest.mark.parametrize("tuitest_arguments", [args], indirect=True)
 
 
-def with_captured_stdout():
+def with_captured_stdout(capture_output: bool = True):
     """Capture stdout instead of showing it in the virtual terminal.
 
     The captured stdout is availabale in the output of Terminal::wait_for_finished.
+    Note: This is a decorator intended to be applied to a test function.
 
-    Note: This is a decorator intended to be applied to a test function."""
-    return pytest.mark.parametrize("tuitest_capture_stdout", [True], indirect=True)
+    Args:
+        capture_output (bool, optional): Whether the output should be captured. Defaults
+            to True.
+    """
+    return pytest.mark.parametrize("tuitest_capture_stdout", [capture_output], indirect=True)
