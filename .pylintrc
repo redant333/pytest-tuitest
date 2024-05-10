@@ -2,3 +2,8 @@
 # Rationale:
 # e - common name for exception in try/except
 good-names=e
+
+# Files in test_plugin contain a lot of similar but independent
+# code. It doesn't seem easy to disable it for just that subdirectory
+# so just disable it for the whole repo.
+disable=duplicate-code
