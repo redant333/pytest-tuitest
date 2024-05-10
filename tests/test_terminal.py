@@ -75,7 +75,7 @@ class TestGetStringAt:
 
 
 class TestWaitForFinished:
-    """Tests for Termina.wait_for_finished."""
+    """Tests for Terminal.wait_for_finished."""
     @pytest.mark.parametrize("terminal",
                              [{
                                  "executable": "outputs.sh",
