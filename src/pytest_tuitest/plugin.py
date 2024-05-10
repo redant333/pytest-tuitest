@@ -38,9 +38,10 @@ class TuitestSetupException(Exception):
 
 
 @pytest.fixture
-def terminal(tuitest_executable, tuitest_arguments):
+def terminal(tuitest_executable, tuitest_arguments, tuitest_capture_stdout):
     """The main fixture that enables terminal interaction."""
-    process = Process(executable=tuitest_executable, args=tuitest_arguments)
+    process = Process(executable=tuitest_executable,
+                      args=tuitest_arguments, capture_stdout=tuitest_capture_stdout)
     return Terminal(process)
 
 
@@ -79,16 +80,43 @@ def fixture_tuitest_arguments(request):
 
     return None
 
+
+@pytest.fixture(name="tuitest_capture_stdout")
+def fixture_capture_stdout(request):
+    """Fixture that defines whether the stdout of the executable is captured.
+
+    If it's not captured, it will be displayed in the virtual terminal.
+
+    This fixture can be parametrized by using with_captured_stdout decorator or
+    @pytest.mark.parametrize with indirect flag. If it's not parametrized, it
+    returns False.
+    """
+    return getattr(request, "param", False)
+
 ###############################################################################
 # Decorators
 ###############################################################################
 
 
 def test_executable(executable):
-    """Decorator that enables setting the executable used in terminal fixture."""
+    """Use this executable for the test.
+
+    Note: This is a decorator intended to be applied to a test function.
+    """
     return pytest.mark.parametrize("tuitest_executable", [executable], indirect=True)
 
 
 def with_arguments(args):
-    """Decorator that enables setting the executable arguments used in terminal fixture."""
+    """Send these arguments to the executable.
+
+    Note: This is a decorator intended to be applied to a test function."""
     return pytest.mark.parametrize("tuitest_arguments", [args], indirect=True)
+
+
+def with_captured_stdout():
+    """Capture stdout instead of showing it in the virtual terminal.
+
+    The captured stdout is availabale in the output of Terminal::wait_for_finished.
+
+    Note: This is a decorator intended to be applied to a test function."""
+    return pytest.mark.parametrize("tuitest_capture_stdout", [True], indirect=True)
