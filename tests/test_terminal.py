@@ -6,7 +6,7 @@ import pytest
 from pytest_tuitest import (ColorNamed, OutsideBounds, Process, Terminal,
                             TimedOut, UnsupportedColor)
 
-# These are test classes. There use is only for organization so the
+# These are test classes. Their purpose is only for organization so the
 # number of public methods does not matter.
 # pylint: disable=too-few-public-methods
 
