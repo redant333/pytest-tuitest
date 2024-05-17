@@ -5,6 +5,7 @@ import pytest
 from .terminal import Process, Terminal
 
 _EXECUTABLE_PARAM = "tuitest-default-executable"
+_STDOUT_CAPTURE_PARAM = "tuitest-capture-stdout"
 
 
 def addoption_executable(parser):
@@ -24,9 +25,20 @@ def addoption_executable(parser):
     )
 
 
+def addoption_stdout_capture(parser):
+    """Add ini option for specifying whether stdout should be captured by default."""
+    parser.addini(
+        name=_STDOUT_CAPTURE_PARAM,
+        type="bool",
+        help="Whether to capture stdout when capturing stdout is not explicitly" +
+             " specified. False by default."
+    )
+
+
 def pytest_addoption(parser):
     """Add tuitest-specific options."""
     addoption_executable(parser)
+    addoption_stdout_capture(parser)
 
 
 class TuitestSetupException(Exception):
@@ -91,7 +103,13 @@ def fixture_capture_stdout(request):
     @pytest.mark.parametrize with indirect flag. If it's not parametrized, it
     returns False.
     """
-    return getattr(request, "param", False)
+    if hasattr(request, "param"):
+        return request.param
+
+    if ini_capture_stdout := request.config.getini(_STDOUT_CAPTURE_PARAM):
+        return ini_capture_stdout
+
+    return False
 
 ###############################################################################
 # Decorators

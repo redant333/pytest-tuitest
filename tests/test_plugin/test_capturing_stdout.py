@@ -46,3 +46,62 @@ def test_stdout_captured_if_with_captured_stdout_is_used(pytester, test_scripts_
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=1)
+
+
+def test_stdout_captured_if_ini_option_set_to_true(pytester, test_scripts_dir):
+    """Verify that specifying stdout capture in the ini file causes stdout to be captured."""
+    pytester.makeini(
+        """
+        [pytest]
+        tuitest-capture-stdout = true
+        """)
+
+    pytester.makepyfile(
+        f"""
+        import pytest
+        import pytest_tuitest as tt
+
+        @tt.test_executable("{test_scripts_dir}/run_command.sh")
+        @tt.with_arguments(["echo", "-n", "X"])
+        def test_arguments(terminal):
+            (status, stdout, _) = terminal.wait_for_finished()
+
+            assert status == 0, "Process unexpectedly failed"
+            assert stdout == b"X", "Captured stdout not as expected"
+
+            msg = "Expected empty screen, found something at 0,0"
+            assert terminal.get_string_at(0, 0, 1) != "X", msg
+        """)
+
+    result = pytester.runpytest()
+    result.assert_outcomes(passed=1)
+
+
+def test_decorator_has_higher_priority_than_ini_option(pytester, test_scripts_dir):
+    """Verify that the stdout capture value from ini file has higher priority than the decorator."""
+    pytester.makeini(
+        """
+        [pytest]
+        tuitest-capture-stdout = true
+        """)
+
+    pytester.makepyfile(
+        f"""
+        import pytest
+        import pytest_tuitest as tt
+
+        @tt.test_executable("{test_scripts_dir}/run_command.sh")
+        @tt.with_arguments(["echo", "-n", "X"])
+        @tt.with_captured_stdout(False)
+        def test_arguments(terminal):
+            (status, stdout, _) = terminal.wait_for_finished()
+
+            assert status == 0, "Process unexpectedly failed"
+            assert stdout == None, "Captured stdout not expected but received"
+
+            msg = "Found unexpected value on the screen"
+            assert terminal.get_string_at(0, 0, 1) != " ", msg
+        """)
+
+    result = pytester.runpytest()
+    result.assert_outcomes(passed=1)
