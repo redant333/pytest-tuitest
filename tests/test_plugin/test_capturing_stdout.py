@@ -10,7 +10,7 @@ def test_stdout_not_captured_by_default(pytester, test_scripts_dir):
 
         @tt.test_executable("{test_scripts_dir}/run_command.sh")
         @tt.with_arguments(["echo", "-n", "X"])
-        def test_arguments(terminal):
+        def test_stdout_capture(terminal):
             (status, stdout, _) = terminal.wait_for_finished()
 
             assert status == 0, "Process unexpectedly failed"
@@ -34,7 +34,7 @@ def test_stdout_captured_if_with_captured_stdout_is_used(pytester, test_scripts_
         @tt.test_executable("{test_scripts_dir}/run_command.sh")
         @tt.with_arguments(["echo", "-n", "X"])
         @tt.with_captured_stdout()
-        def test_arguments(terminal):
+        def test_stdout_capture(terminal):
             (status, stdout, _) = terminal.wait_for_finished()
 
             assert status == 0, "Process unexpectedly failed"
@@ -63,7 +63,7 @@ def test_stdout_captured_if_ini_option_set_to_true(pytester, test_scripts_dir):
 
         @tt.test_executable("{test_scripts_dir}/run_command.sh")
         @tt.with_arguments(["echo", "-n", "X"])
-        def test_arguments(terminal):
+        def test_stdout_capture(terminal):
             (status, stdout, _) = terminal.wait_for_finished()
 
             assert status == 0, "Process unexpectedly failed"
@@ -93,7 +93,7 @@ def test_decorator_has_higher_priority_than_ini_option(pytester, test_scripts_di
         @tt.test_executable("{test_scripts_dir}/run_command.sh")
         @tt.with_arguments(["echo", "-n", "X"])
         @tt.with_captured_stdout(False)
-        def test_arguments(terminal):
+        def test_stdout_capture(terminal):
             (status, stdout, _) = terminal.wait_for_finished()
 
             assert status == 0, "Process unexpectedly failed"
