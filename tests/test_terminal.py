@@ -89,11 +89,11 @@ class TestWaitForFinished:
         msg = "Process unexpectedly failed"
         assert exit_code == 0, msg
 
-        expected = b"This goes to stdout\n"
+        expected = "This goes to stdout\n"
         msg = f"Got '{stdout}' as stdout, expected '{expected}'"
         assert stdout == expected, msg
 
-        expected = b"This goes to stderr\n"
+        expected = "This goes to stderr\n"
         msg = f"Got '{stderr}' as stderr, expected '{expected}'"
         assert stderr == expected, msg
 

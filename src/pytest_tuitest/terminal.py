@@ -137,12 +137,27 @@ class Terminal:
         """Block until new output is received from the process."""
         self._process.wait_for_output()
 
-    def wait_for_finished(self) -> tuple[int, bytes, bytes]:
+    def wait_for_finished(self, encoding: str = "utf8") -> tuple[int, str, str]:
         """Block until the process finishes and return the information about it.
 
-        This is just a proxy method to wait_for_finished of the inner process.
+        Args:
+            encoding (str): The encoding to be used to decode captured outputs.
+
+        Returns:
+            tuple[int, str, str]: A tuple with the following information about the process:
+                - return code of the process
+                - captured stdout if stdout capturing is enabled, None otherwise
+                - captured stderr if stderr capturing is enabled, None otherwise
         """
-        return self._process.wait_for_finished()
+        (status, stdout, stderr) = self._process.wait_for_finished()
+
+        if stdout:
+            stdout = stdout.decode(encoding)
+
+        if stderr:
+            stderr = stderr.decode(encoding)
+
+        return (status, stdout, stderr)
 
     def wait_for_stable_output(self, stable_time_sec=0.1, max_wait_sec=5) -> None:
         """Wait for the terminal output to stabilize for at least stable_time_sec.

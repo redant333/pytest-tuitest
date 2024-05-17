@@ -38,7 +38,7 @@ def test_stdout_captured_if_with_captured_stdout_is_used(pytester, test_scripts_
             (status, stdout, _) = terminal.wait_for_finished()
 
             assert status == 0, "Process unexpectedly failed"
-            assert stdout == b"X", "Captured stdout not as expected"
+            assert stdout == "X", "Captured stdout not as expected"
 
             msg = "Expected empty screen, found something at 0,0"
             assert terminal.get_string_at(0, 0, 1) != "X", msg
@@ -67,7 +67,7 @@ def test_stdout_captured_if_ini_option_set_to_true(pytester, test_scripts_dir):
             (status, stdout, _) = terminal.wait_for_finished()
 
             assert status == 0, "Process unexpectedly failed"
-            assert stdout == b"X", "Captured stdout not as expected"
+            assert stdout == "X", "Captured stdout not as expected"
 
             msg = "Expected empty screen, found something at 0,0"
             assert terminal.get_string_at(0, 0, 1) != "X", msg
