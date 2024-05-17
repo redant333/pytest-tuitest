@@ -6,6 +6,7 @@ from .terminal import Process, Terminal
 
 _EXECUTABLE_PARAM = "tuitest-default-executable"
 _STDOUT_CAPTURE_PARAM = "tuitest-capture-stdout"
+_STDERR_CAPTURE_PARAM = "tuitest-capture-stderr"
 
 
 def addoption_executable(parser):
@@ -35,10 +36,21 @@ def addoption_stdout_capture(parser):
     )
 
 
+def addoption_stderr_capture(parser):
+    """Add ini option for specifying whether stderr should be captured by default."""
+    parser.addini(
+        name=_STDERR_CAPTURE_PARAM,
+        type="bool",
+        help="Whether to capture stderr when capturing stderr is not explicitly" +
+             " specified. False by default."
+    )
+
+
 def pytest_addoption(parser):
     """Add tuitest-specific options."""
     addoption_executable(parser)
     addoption_stdout_capture(parser)
+    addoption_stderr_capture(parser)
 
 
 class TuitestSetupException(Exception):
@@ -50,10 +62,12 @@ class TuitestSetupException(Exception):
 
 
 @pytest.fixture
-def terminal(tuitest_executable, tuitest_arguments, tuitest_capture_stdout):
+def terminal(tuitest_executable, tuitest_arguments, tuitest_capture_stdout, tuitest_capture_stderr):
     """The main fixture that enables terminal interaction."""
     process = Process(executable=tuitest_executable,
-                      args=tuitest_arguments, capture_stdout=tuitest_capture_stdout)
+                      args=tuitest_arguments,
+                      capture_stdout=tuitest_capture_stdout,
+                      capture_stderr=tuitest_capture_stderr)
     return Terminal(process)
 
 
@@ -117,6 +131,26 @@ def fixture_capture_stdout(request):
 
     return False
 
+
+@pytest.fixture(name="tuitest_capture_stderr")
+def fixture_capture_stderr(request):
+    """Fixture that defines whether the stderr of the executable is captured.
+
+    If it's not captured, it will be displayed in the virtual terminal.
+
+    The return value of this fixture is, in the order of priority, are:
+    - The value specified with with_captured_stderr decorator or @pytest.mark.parametrize
+      with indirect flag
+    - The value specified by using pytest.ini option tuitest-capture-stderr
+    - False
+    """
+    if hasattr(request, "param"):
+        return request.param
+
+    if ini_capture_stderr := request.config.getini(_STDERR_CAPTURE_PARAM):
+        return ini_capture_stderr
+
+    return False
 ###############################################################################
 # Decorators
 ###############################################################################
@@ -148,3 +182,16 @@ def with_captured_stdout(capture_output: bool = True):
             to True.
     """
     return pytest.mark.parametrize("tuitest_capture_stdout", [capture_output], indirect=True)
+
+
+def with_captured_stderr(capture_stderr: bool = True):
+    """Capture stderr instead of showing it in the virtual terminal.
+
+    The captured stderr is availabale in the output of Terminal::wait_for_finished.
+    Note: This is a decorator intended to be applied to a test function.
+
+    Args:
+        capture_stderr (bool, optional): Whether the stderr output should be captured. Defaults
+            to True.
+    """
+    return pytest.mark.parametrize("tuitest_capture_stderr", [capture_stderr], indirect=True)
