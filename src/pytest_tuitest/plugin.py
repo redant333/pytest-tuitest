@@ -10,7 +10,7 @@ _STDOUT_CAPTURE_PARAM = "tuitest-capture-stdout"
 
 def addoption_executable(parser):
     """Add ini and command line options for specifying default executable."""
-    help_text = "Executable to be used for tests when the executable it isn't explicitly specified."
+    help_text = "Executable to be used for tests when the executable isn't explicitly specified."
 
     parser.addini(
         name=_EXECUTABLE_PARAM,
@@ -61,10 +61,14 @@ def terminal(tuitest_executable, tuitest_arguments, tuitest_capture_stdout):
 def fixture_tuitest_executable(request):
     """Fixture that defines the executable used in terminal fixture.
 
-    It can be parametrized by using test_executable decorator or @pytest.mark.parametrize
-    with indirect flag. If it's not parametrized, it will return the value of ini parameter
-    tuitest_default_executable. If tuitest_default_executable is not defined, it raises an
-    exception.
+    The return value of this fixture is, in the order of priority, are:
+    - The value specified with test_executable decorator or @pytest.mark.parametrize
+      with indirect flag
+    - The value specified with command line option --tuitest-default-executable
+    - The value specified by using pytest.ini option tuitest-default-executable
+
+    If the default executable is not specified in any of the listed ways, an exception
+    is raised.
     """
     if hasattr(request, "param") and request.param:
         return request.param
@@ -99,9 +103,11 @@ def fixture_capture_stdout(request):
 
     If it's not captured, it will be displayed in the virtual terminal.
 
-    This fixture can be parametrized by using with_captured_stdout decorator or
-    @pytest.mark.parametrize with indirect flag. If it's not parametrized, it
-    returns False.
+    The return value of this fixture is, in the order of priority, are:
+    - The value specified with with_captured_stdout decorator or @pytest.mark.parametrize
+      with indirect flag
+    - The value specified by using pytest.ini option tuitest-capture-stdout
+    - False
     """
     if hasattr(request, "param"):
         return request.param
