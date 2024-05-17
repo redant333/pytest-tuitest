@@ -151,10 +151,10 @@ class Terminal:
         """
         (status, stdout, stderr) = self._process.wait_for_finished()
 
-        if stdout:
+        if stdout is not None:
             stdout = stdout.decode(encoding)
 
-        if stderr:
+        if stderr is not None:
             stderr = stderr.decode(encoding)
 
         return (status, stdout, stderr)

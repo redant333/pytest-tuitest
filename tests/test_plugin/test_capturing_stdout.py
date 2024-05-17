@@ -105,3 +105,24 @@ def test_decorator_has_higher_priority_than_ini_option(pytester, test_scripts_di
 
     result = pytester.runpytest()
     result.assert_outcomes(passed=1)
+
+
+def test_stdout_can_be_captured_even_when_empty(pytester, test_scripts_dir):
+    """Verify that stdout can be even when there is nothing on it."""
+    pytester.makepyfile(
+        f"""
+        import pytest
+        import pytest_tuitest as tt
+
+        @tt.test_executable("{test_scripts_dir}/run_command.sh")
+        @tt.with_arguments(["true"])
+        @tt.with_captured_stdout()
+        def test_stdout_capture(terminal):
+            (status, stdout, _) = terminal.wait_for_finished()
+
+            assert status == 0, "Process unexpectedly failed"
+            assert stdout == "", "Captured stdout not as expected"
+        """)
+
+    result = pytester.runpytest()
+    result.assert_outcomes(passed=1)
