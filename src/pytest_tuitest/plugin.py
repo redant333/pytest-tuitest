@@ -174,7 +174,7 @@ def with_arguments(args):
 def with_captured_stdout(capture_output: bool = True):
     """Capture stdout instead of showing it in the virtual terminal.
 
-    The captured stdout is availabale in the output of Terminal::wait_for_finished.
+    The captured stdout is available in the output of Terminal::wait_for_finished.
     Note: This is a decorator intended to be applied to a test function.
 
     Args:
@@ -187,7 +187,7 @@ def with_captured_stdout(capture_output: bool = True):
 def with_captured_stderr(capture_stderr: bool = True):
     """Capture stderr instead of showing it in the virtual terminal.
 
-    The captured stderr is availabale in the output of Terminal::wait_for_finished.
+    The captured stderr is available in the output of Terminal::wait_for_finished.
     Note: This is a decorator intended to be applied to a test function.
 
     Args:
