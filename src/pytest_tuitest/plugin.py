@@ -62,12 +62,17 @@ class TuitestSetupException(Exception):
 
 
 @pytest.fixture
-def terminal(tuitest_executable, tuitest_arguments, tuitest_capture_stdout, tuitest_capture_stderr):
+def terminal(tuitest_executable,
+             tuitest_arguments,
+             tuitest_capture_stdout,
+             tuitest_capture_stderr,
+             tuitest_stdin):
     """The main fixture that enables terminal interaction."""
     process = Process(executable=tuitest_executable,
                       args=tuitest_arguments,
                       capture_stdout=tuitest_capture_stdout,
-                      capture_stderr=tuitest_capture_stderr)
+                      capture_stderr=tuitest_capture_stderr,
+                      stdin=tuitest_stdin)
     return Terminal(process)
 
 
@@ -151,6 +156,20 @@ def fixture_capture_stderr(request):
         return ini_capture_stderr
 
     return False
+
+
+@pytest.fixture(name="tuitest_stdin")
+def fixture_stdin(request):
+    """Fixture that determines the stdin to be sent to the executable.
+
+    It can be parametrized by using with_stdin decorator or @pytest.mark.parametrize
+    with indirect flag. If it's not parametrized, no stdin will be sent to the executable.
+    """
+    if hasattr(request, "param"):
+        return request.param.encode("utf8")
+
+    return None
+
 ###############################################################################
 # Decorators
 ###############################################################################
@@ -195,3 +214,14 @@ def with_captured_stderr(capture_stderr: bool = True):
             to True.
     """
     return pytest.mark.parametrize("tuitest_capture_stderr", [capture_stderr], indirect=True)
+
+
+def with_stdin(stdin: str):
+    """Send the provided stdin to the executable stdin.
+
+    Note: This is a decorator intended to be applied to a test function.
+
+    Args:
+        stdin (str): UTF8 encoded string to send to the executable
+    """
+    return pytest.mark.parametrize("tuitest_stdin", [stdin], indirect=True)
