@@ -100,6 +100,21 @@ class TestWaitForFinished:
     @pytest.mark.parametrize("terminal",
                              [{
                                  "executable": "outputs.sh",
+                                 "capture_stdout": True,
+                                 "capture_stderr": True}],
+                             indirect=True)
+    def test_dev_tty_can_be_read_when_outputs_are_captured(self, terminal):
+        """Verify that all expected values are returned when capturing."""
+        terminal.wait_for_finished()
+
+        expected = "This goes to /dev/tty"
+        msg = "Expected /dev/tty output on the screen, found something else"
+
+        assert terminal.get_string_at(0, 0, len(expected)) == expected, msg
+
+    @pytest.mark.parametrize("terminal",
+                             [{
+                                 "executable": "outputs.sh",
                                  "capture_stdout": False,
                                  "capture_stderr": False}],
                              indirect=True)
