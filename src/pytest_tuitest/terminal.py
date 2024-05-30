@@ -11,10 +11,6 @@ class OutsideBounds(Exception):
     """Raised when information is requested for invalid coordinates."""
 
 
-class UnsupportedColor(Exception):
-    """Raised when a color cannot be decoded."""
-
-
 class TimedOut(Exception):
     """Raised when an operation times out."""
 
@@ -110,8 +106,7 @@ class Terminal:
         pyte_color = self._get_attribute_at(line, column, "fg")
 
         if pyte_color not in _PYTE_TO_COLOR_NAMED_MAP:
-            msg = f"Could not decode color at ({line}, {column})"
-            raise UnsupportedColor(msg)
+            return ColorNamed.COULD_NOT_DECODE
 
         return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
 
@@ -128,8 +123,7 @@ class Terminal:
         pyte_color = self._get_attribute_at(line, column, "bg")
 
         if pyte_color not in _PYTE_TO_COLOR_NAMED_MAP:
-            msg = f"Could not decode color at ({line}, {column})"
-            raise UnsupportedColor(msg)
+            return ColorNamed.COULD_NOT_DECODE
 
         return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
 

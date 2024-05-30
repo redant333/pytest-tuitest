@@ -21,3 +21,4 @@ class ColorNamed(Enum):
     BRIGHT_CYAN = auto()
     BRIGHT_WHITE = auto()
     DEFAULT = auto()
+    COULD_NOT_DECODE = auto()

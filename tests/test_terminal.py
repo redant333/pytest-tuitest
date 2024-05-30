@@ -4,7 +4,7 @@ import time
 import pytest
 
 from pytest_tuitest import (ColorNamed, OutsideBounds, Process, Terminal,
-                            TimedOut, UnsupportedColor)
+                            TimedOut)
 
 # These are test classes. Their purpose is only for organization so the
 # number of public methods does not matter.
@@ -149,15 +149,14 @@ class TestGetForegroundAt:
         assert color == expected_color
 
     @pytest.mark.parametrize("terminal", [{"executable": "colors.sh"}], indirect=True)
-    def test_raises_exception_for_256_color(self, terminal):
-        """Verify that an exception is raised when getting a color from 256 color set.
+    def test_returns_could_not_decode_for_256_color(self, terminal):
+        """Verify that COULD_NOT_DECODE is returned when getting a color from 256 color set.
 
         Currently, only colors from 16 color set are supported.
         """
         terminal.wait_for_output()
 
-        with pytest.raises(UnsupportedColor):
-            terminal.get_foreground_at(7, 0)
+        assert terminal.get_foreground_at(7, 0) == ColorNamed.COULD_NOT_DECODE
 
     @pytest.mark.parametrize("terminal",
                              [{"executable": "colors.sh", "lines": 10, "columns": 10}],
@@ -208,15 +207,14 @@ class TestGetBackgroundAt:
         assert color == expected_color
 
     @pytest.mark.parametrize("terminal", [{"executable": "colors.sh"}], indirect=True)
-    def test_raises_exception_for_256_color(self, terminal):
-        """Verify that an exception is raised when getting a color from 256 color set.
+    def test_returns_could_not_decode_for_256_color(self, terminal):
+        """Verify that COULD_NOT_DECODE is returned when getting a color from 256 color set.
 
         Currently, only colors from 16 color set are supported.
         """
         terminal.wait_for_output()
 
-        with pytest.raises(UnsupportedColor):
-            terminal.get_background_at(7, 0)
+        assert terminal.get_background_at(7, 0) == ColorNamed.COULD_NOT_DECODE
 
     @pytest.mark.parametrize("terminal",
                              [{"executable": "colors.sh", "lines": 10, "columns": 10}],
