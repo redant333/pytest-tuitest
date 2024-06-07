@@ -189,9 +189,12 @@ class Terminal:
             return True
 
         while should_poll():
-            output_received = self._process.wait_for_output(timeout_sec=0.01)
-            if output_received:
-                self._update_screen()
+            output_ready = self._process.wait_for_output(timeout_sec=0.01)
+            if not output_ready:
+                continue
+
+            screen_updated = self._update_screen()
+            if screen_updated:
                 last_update = time.time()
 
     def send(self, characters: str) -> None:
@@ -203,8 +206,14 @@ class Terminal:
         encoded = characters.encode()
         self._process.write(encoded)
 
-    def _update_screen(self) -> None:
-        """Refresh the internal knowledge about the process output."""
+    def _update_screen(self) -> bool:
+        """Refresh the internal knowledge about the process output.
+
+        Returns:
+            (bool): True if the screen has changed, False otherwise.
+        """
+        screen_updated = False
+
         while self._process_running:
             try:
                 data = self._process.get_new_output()
@@ -213,9 +222,12 @@ class Terminal:
                     break
 
                 self._stream.feed(data)
+                screen_updated = True
             except ProcessFinished:
                 self._process_running = False
                 break
+
+        return screen_updated
 
     def _raise_if_outside_bounds(self, line: int, column: int, msg: str) -> None:
         """Raise OutsideBounds exception if given coordinates are not inside the terminal."""

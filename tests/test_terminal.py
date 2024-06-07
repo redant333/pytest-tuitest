@@ -73,6 +73,34 @@ class TestGetStringAt:
         with pytest.raises(OutsideBounds):
             terminal.get_string_at(line, column, length)
 
+    @pytest.mark.parametrize(
+        "terminal, expected", [
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": False,
+             "capture_stderr": False, "stdin": None}, "OET"),
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": False,
+             "capture_stderr": False, "stdin": "test"}, "OET"),
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": False,
+             "capture_stderr": True, "stdin": None}, "OT "),
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": False,
+             "capture_stderr": True, "stdin": "test"}, "OT "),
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": True,
+             "capture_stderr": False, "stdin": None}, "ET "),
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": True,
+             "capture_stderr": False, "stdin": "test"}, "ET "),
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": True,
+             "capture_stderr": True, "stdin": None}, "T  "),
+            ({"executable": "outputs_one_letter.sh", "capture_stdout": True,
+             "capture_stderr": True, "stdin": "test"}, "T  "),
+        ],
+        indirect=["terminal"],
+    )
+    def test_get_new_output_works_with_various_redirects(self, terminal, expected):
+        """Verify that get_new_output returns expected values when inputs/outputs are redirected."""
+        terminal.wait_for_stable_output()
+
+        msg = "Received output different from expected"
+        assert terminal.get_string_at(0, 0, 3) == expected, msg
+
 
 class TestWaitForFinished:
     """Tests for Terminal.wait_for_finished."""

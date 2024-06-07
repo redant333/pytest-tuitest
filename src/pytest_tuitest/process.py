@@ -52,8 +52,14 @@ class Process:  # pylint: disable=too-many-instance-attributes
 
         self._lines = lines
         self._columns = columns
+
         self._captured_stdout = None
+        self._stdout_redirected = capture_stdout
+
         self._captured_stderr = None
+        self._stderr_redirected = capture_stderr
+
+        self._stdin_redirected = stdin is not None
         self._exit_status = None
 
         if capture_stdout:
@@ -149,6 +155,20 @@ class Process:  # pylint: disable=too-many-instance-attributes
         except BlockingIOError:
             return b""
         except OSError as e:
+            # pylint: disable-next=fixme
+            # TODO Fix end of file detection when all IO is redirected
+            #
+            # For whichever reason, errno.EIO is returned on first read when
+            # all three IOs are redirected, even though data can be read on
+            # successive calls. For now, just don't raise the exception when
+            # this happens.
+            all_io_redirected = all((
+                self._stdin_redirected, self._stdout_redirected, self._stderr_redirected))
+
+            if e.args[0] == errno.EIO and all_io_redirected:
+                return b""
+
+            # In other cases, treat errno.EIO as end of file
             if e.args[0] == errno.EIO:
                 # End of file reached, original error irrelevant
                 # pylint: disable-next=raise-missing-from
