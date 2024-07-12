@@ -62,17 +62,25 @@ class TuitestSetupException(Exception):
 
 
 @pytest.fixture
+# The terminal can be parametrized in many ways and each of those is a fixture.
+# No point in grouping them the arguments in any way.
+# pylint: disable-next=too-many-arguments
 def terminal(tuitest_executable,
              tuitest_arguments,
              tuitest_capture_stdout,
              tuitest_capture_stderr,
-             tuitest_stdin):
+             tuitest_stdin,
+             tuitest_terminal_size):
     """The main fixture that enables terminal interaction."""
+    columns, lines = tuitest_terminal_size
+
     process = Process(executable=tuitest_executable,
                       args=tuitest_arguments,
                       capture_stdout=tuitest_capture_stdout,
                       capture_stderr=tuitest_capture_stderr,
-                      stdin=tuitest_stdin)
+                      stdin=tuitest_stdin,
+                      lines=lines,
+                      columns=columns)
     return Terminal(process)
 
 
@@ -170,6 +178,21 @@ def fixture_stdin(request):
 
     return None
 
+
+@pytest.fixture(name="tuitest_terminal_size")
+def fixture_terminal_size(request):
+    """Fixture that determines the size of the instantiated virtual terminal.
+
+    Its value is a tuple of the form (columns, lines) and it can be parametrized by
+    using with_terminal_size decorator or @pytest.mark.parametrize with indirect flag.
+
+    If it's not parametrized, the terminal will be instantiated with size (80, 24)
+    """
+    if hasattr(request, "param"):
+        return request.param
+
+    return (80, 24)
+
 ###############################################################################
 # Decorators
 ###############################################################################
@@ -225,3 +248,15 @@ def with_stdin(stdin: str):
         stdin (str): UTF8 encoded string to send to the executable
     """
     return pytest.mark.parametrize("tuitest_stdin", [stdin], indirect=True)
+
+
+def with_terminal_size(columns: int, lines: int):
+    """Initialize the terminal with the provided size.
+
+    Note: This is a decorator intended to be applied to a test function.
+
+    Args:
+        columns (int): The number of columns in the virtual terminal.
+        lines (int): The number of lines in the virtual terminal.
+    """
+    return pytest.mark.parametrize("tuitest_terminal_size", [(columns, lines)], indirect=True)
