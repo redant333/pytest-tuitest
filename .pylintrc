@@ -3,7 +3,12 @@
 # e - common name for exception in try/except
 good-names=e
 
+# duplicate-code:
 # Files in test_plugin contain a lot of similar but independent
 # code. It doesn't seem easy to disable it for just that subdirectory
 # so just disable it for the whole repo.
-disable=duplicate-code
+#
+# no-else-return:
+# Having else after return makes it possible to signal to the reader
+# in a very obvious way that the branches are mutually exclusive.
+disable=duplicate-code, no-else-return
