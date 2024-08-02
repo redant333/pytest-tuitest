@@ -3,8 +3,8 @@ import time
 
 import pytest
 
-from pytest_tuitest import (ColorNamed, OutsideBounds, Process, Terminal,
-                            TimedOut)
+from pytest_tuitest import Color16, OutsideBounds, Process, Terminal, TimedOut
+from pytest_tuitest.colors import Color256
 
 # These are test classes. Their purpose is only for organization so the
 # number of public methods does not matter.
@@ -165,23 +165,23 @@ class TestGetForegroundAt:
 
     @pytest.mark.parametrize("terminal", [{"executable": "all_16_colors.sh"}], indirect=True)
     @pytest.mark.parametrize("line, expected_color", [
-        (0, ColorNamed.BLACK),
-        (1, ColorNamed.RED),
-        (2, ColorNamed.GREEN),
-        (3, ColorNamed.YELLOW),
-        (4, ColorNamed.BLUE),
-        (5, ColorNamed.MAGENTA),
-        (6, ColorNamed.CYAN),
-        (7, ColorNamed.WHITE),
-        (8, ColorNamed.BRIGHT_BLACK),
-        (9, ColorNamed.BRIGHT_RED),
-        (10, ColorNamed.BRIGHT_GREEN),
-        (11, ColorNamed.BRIGHT_YELLOW),
-        (12, ColorNamed.BRIGHT_BLUE),
-        (13, ColorNamed.BRIGHT_MAGENTA),
-        (14, ColorNamed.BRIGHT_CYAN),
-        (15, ColorNamed.BRIGHT_WHITE),
-        (16, ColorNamed.DEFAULT),
+        (0, Color16.BLACK),
+        (1, Color16.RED),
+        (2, Color16.GREEN),
+        (3, Color16.YELLOW),
+        (4, Color16.BLUE),
+        (5, Color16.MAGENTA),
+        (6, Color16.CYAN),
+        (7, Color16.WHITE),
+        (8, Color16.BRIGHT_BLACK),
+        (9, Color16.BRIGHT_RED),
+        (10, Color16.BRIGHT_GREEN),
+        (11, Color16.BRIGHT_YELLOW),
+        (12, Color16.BRIGHT_BLUE),
+        (13, Color16.BRIGHT_MAGENTA),
+        (14, Color16.BRIGHT_CYAN),
+        (15, Color16.BRIGHT_WHITE),
+        (16, Color16.DEFAULT),
     ])
     def test_returns_correct_16_color(self, terminal, line, expected_color):
         """Verify that foreground color is returned as expected."""
@@ -191,15 +191,28 @@ class TestGetForegroundAt:
 
         assert color == expected_color
 
+    @pytest.mark.parametrize("terminal", [{"executable": "all_256_colors.sh", "lines": 257}],
+                             indirect=True)
+    @pytest.mark.parametrize("line, expected_color",
+                             [(i, getattr(Color256, f"COLOR{i}")) for i in range(256)])
+    def test_returns_correct_256_color(self, terminal, line, expected_color):
+        """Verify that foreground color from 256 set is returned as expected."""
+        terminal.wait_for_stable_output()
+
+        color = terminal.get_foreground_at(line, 0)
+
+        assert color == expected_color
+
     @pytest.mark.parametrize("terminal", [{"executable": "colors.sh"}], indirect=True)
-    def test_returns_could_not_decode_for_256_color(self, terminal):
-        """Verify that COULD_NOT_DECODE is returned when getting a color from 256 color set.
+    def test_returns_correct_rgb_color(self, terminal):
+        """Verify that RGB background color is returned as expected."""
+        terminal.wait_for_stable_output()
 
-        Currently, only colors from 16 color set are supported.
-        """
-        terminal.wait_for_output()
+        color = terminal.get_foreground_at(9, 0)
+        assert color == "ff0000"
 
-        assert terminal.get_foreground_at(7, 0) == ColorNamed.COULD_NOT_DECODE
+        color = terminal.get_foreground_at(11, 0)
+        assert color == "ff00ff"
 
     @pytest.mark.parametrize("terminal",
                              [{"executable": "colors.sh", "lines": 10, "columns": 10}],
@@ -223,23 +236,23 @@ class TestGetBackgroundAt:
 
     @pytest.mark.parametrize("terminal", [{"executable": "all_16_colors.sh"}], indirect=True)
     @pytest.mark.parametrize("line, expected_color", [
-        (0, ColorNamed.BLACK),
-        (1, ColorNamed.RED),
-        (2, ColorNamed.GREEN),
-        (3, ColorNamed.YELLOW),
-        (4, ColorNamed.BLUE),
-        (5, ColorNamed.MAGENTA),
-        (6, ColorNamed.CYAN),
-        (7, ColorNamed.WHITE),
-        (8, ColorNamed.BRIGHT_BLACK),
-        (9, ColorNamed.BRIGHT_RED),
-        (10, ColorNamed.BRIGHT_GREEN),
-        (11, ColorNamed.BRIGHT_YELLOW),
-        (12, ColorNamed.BRIGHT_BLUE),
-        (13, ColorNamed.BRIGHT_MAGENTA),
-        (14, ColorNamed.BRIGHT_CYAN),
-        (15, ColorNamed.BRIGHT_WHITE),
-        (16, ColorNamed.DEFAULT),
+        (0, Color16.BLACK),
+        (1, Color16.RED),
+        (2, Color16.GREEN),
+        (3, Color16.YELLOW),
+        (4, Color16.BLUE),
+        (5, Color16.MAGENTA),
+        (6, Color16.CYAN),
+        (7, Color16.WHITE),
+        (8, Color16.BRIGHT_BLACK),
+        (9, Color16.BRIGHT_RED),
+        (10, Color16.BRIGHT_GREEN),
+        (11, Color16.BRIGHT_YELLOW),
+        (12, Color16.BRIGHT_BLUE),
+        (13, Color16.BRIGHT_MAGENTA),
+        (14, Color16.BRIGHT_CYAN),
+        (15, Color16.BRIGHT_WHITE),
+        (16, Color16.DEFAULT),
     ])
     def test_returns_correct_16_color(self, terminal, line, expected_color):
         """Verify that foreground color is returned as expected."""
@@ -249,15 +262,28 @@ class TestGetBackgroundAt:
 
         assert color == expected_color
 
+    @pytest.mark.parametrize("terminal", [{"executable": "all_256_colors.sh", "lines": 257}],
+                             indirect=True)
+    @pytest.mark.parametrize("line, expected_color",
+                             [(i, getattr(Color256, f"COLOR{i}")) for i in range(256)])
+    def test_returns_correct_256_color(self, terminal, line, expected_color):
+        """Verify that background color from 256 set is returned as expected."""
+        terminal.wait_for_stable_output()
+
+        color = terminal.get_background_at(line, 4)
+
+        assert color == expected_color
+
     @pytest.mark.parametrize("terminal", [{"executable": "colors.sh"}], indirect=True)
-    def test_returns_could_not_decode_for_256_color(self, terminal):
-        """Verify that COULD_NOT_DECODE is returned when getting a color from 256 color set.
+    def test_returns_correct_rgb_color(self, terminal):
+        """Verify that RGB background color is returned as expected."""
+        terminal.wait_for_stable_output()
 
-        Currently, only colors from 16 color set are supported.
-        """
-        terminal.wait_for_output()
+        color = terminal.get_background_at(10, 0)
+        assert color == "008000"
 
-        assert terminal.get_background_at(7, 0) == ColorNamed.COULD_NOT_DECODE
+        color = terminal.get_background_at(11, 0)
+        assert color == "00ffff"
 
     @pytest.mark.parametrize("terminal",
                              [{"executable": "colors.sh", "lines": 10, "columns": 10}],

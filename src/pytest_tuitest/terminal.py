@@ -1,9 +1,10 @@
 """Module for virtual terminal interaction."""
+import string
 import time
 
 import pyte
 
-from .colors import ColorNamed
+from .colors import Color16
 from .process import Process, ProcessFinished
 
 
@@ -15,27 +16,40 @@ class TimedOut(Exception):
     """Raised when an operation times out."""
 
 
+class UnrecognizedColor(Exception):
+    """Raised when a color cannot be decoded."""
+
+
 _PYTE_TO_COLOR_NAMED_MAP = {
-    "black": ColorNamed.BLACK,
-    "red": ColorNamed.RED,
-    "green": ColorNamed.GREEN,
-    "brown": ColorNamed.YELLOW,
-    "blue": ColorNamed.BLUE,
-    "magenta": ColorNamed.MAGENTA,
-    "cyan": ColorNamed.CYAN,
-    "white": ColorNamed.WHITE,
-    "brightblack": ColorNamed.BRIGHT_BLACK,
-    "brightred": ColorNamed.BRIGHT_RED,
-    "brightgreen": ColorNamed.BRIGHT_GREEN,
-    "brightbrown": ColorNamed.BRIGHT_YELLOW,
-    "brightblue": ColorNamed.BRIGHT_BLUE,
-    "brightmagenta": ColorNamed.BRIGHT_MAGENTA,
+    "black": Color16.BLACK,
+    "red": Color16.RED,
+    "green": Color16.GREEN,
+    "brown": Color16.YELLOW,
+    "blue": Color16.BLUE,
+    "magenta": Color16.MAGENTA,
+    "cyan": Color16.CYAN,
+    "white": Color16.WHITE,
+    "brightblack": Color16.BRIGHT_BLACK,
+    "brightred": Color16.BRIGHT_RED,
+    "brightgreen": Color16.BRIGHT_GREEN,
+    "brightbrown": Color16.BRIGHT_YELLOW,
+    "brightblue": Color16.BRIGHT_BLUE,
+    "brightmagenta": Color16.BRIGHT_MAGENTA,
     # pyte typo for background colors
-    "bfightmagenta": ColorNamed.BRIGHT_MAGENTA,
-    "brightcyan": ColorNamed.BRIGHT_CYAN,
-    "brightwhite": ColorNamed.BRIGHT_WHITE,
-    "default": ColorNamed.DEFAULT,
+    "bfightmagenta": Color16.BRIGHT_MAGENTA,
+    "brightcyan": Color16.BRIGHT_CYAN,
+    "brightwhite": Color16.BRIGHT_WHITE,
+    "default": Color16.DEFAULT,
 }
+
+
+def _is_rgb_string(string_to_check: str):
+    """Check whether the given string is a 6-digit RBG string."""
+    all_hex_digits = all(
+        c in string.hexdigits for c in string_to_check)
+    good_len = len(string_to_check) == 6
+
+    return good_len and all_hex_digits
 
 
 class Terminal:
@@ -93,7 +107,7 @@ class Terminal:
 
         return "".join(chars)
 
-    def get_foreground_at(self, line: int, column: int) -> ColorNamed:
+    def get_foreground_at(self, line: int, column: int) -> Color16:
         """Get the foreground color at given coordinates.
 
         Args:
@@ -101,16 +115,26 @@ class Terminal:
             column (int): The column at which to get the color.
 
         Returns:
-            ColorNamed: Color at the given coordinates.
+            (ColorNamed|str): Color at the given coordinates as a named color
+                or a 6 digit hex string. Note that, due to limitations of the
+                used library, RGB colors cannot be distingquished from ANSI 256
+                colors and both are returned as RBG strings. Use Colors256 enum
+                to compare the returned string with ANSI 256 index.
+
+        Raises:
+            UnrecognizedColor: If a color at the given location cannot be decoded.
         """
         pyte_color = self._get_attribute_at(line, column, "fg")
 
-        if pyte_color not in _PYTE_TO_COLOR_NAMED_MAP:
-            return ColorNamed.COULD_NOT_DECODE
+        if pyte_color in _PYTE_TO_COLOR_NAMED_MAP:
+            return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
+        elif _is_rgb_string(pyte_color):
+            return pyte_color
 
-        return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
+        msg = f"Unrecognized color at line {line}, column {column}"
+        raise UnrecognizedColor(msg)
 
-    def get_background_at(self, line: int, column: int) -> ColorNamed:
+    def get_background_at(self, line: int, column: int) -> (Color16 | str):
         """Get the background color at given coordinates.
 
         Args:
@@ -118,14 +142,24 @@ class Terminal:
             column (int): The column at which to get the color.
 
         Returns:
-            ColorNamed: Color at the given coordinates.
+            (ColorNamed|str): Color at the given coordinates as a named color
+                or a 6 digit hex string. Note that, due to limitations of the
+                used library, RGB colors cannot be distingquished from ANSI 256
+                colors and both are returned as RBG strings. Use Colors256 enum
+                to compare the returned string with ANSI 256 index.
+
+        Raises:
+            UnrecognizedColor: If a color at the given location cannot be decoded.
         """
         pyte_color = self._get_attribute_at(line, column, "bg")
 
-        if pyte_color not in _PYTE_TO_COLOR_NAMED_MAP:
-            return ColorNamed.COULD_NOT_DECODE
+        if pyte_color in _PYTE_TO_COLOR_NAMED_MAP:
+            return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
+        elif _is_rgb_string(pyte_color):
+            return pyte_color
 
-        return _PYTE_TO_COLOR_NAMED_MAP[pyte_color]
+        msg = f"Unrecognized color at line {line}, column {column}"
+        raise UnrecognizedColor(msg)
 
     def wait_for_output(self) -> None:
         """Block until new output is received from the process."""
