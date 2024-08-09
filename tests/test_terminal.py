@@ -5,6 +5,7 @@ import pytest
 
 from pytest_tuitest import Color16, OutsideBounds, Process, Terminal, TimedOut
 from pytest_tuitest.colors import Color256
+from pytest_tuitest.styles import Style
 
 # These are test classes. Their purpose is only for organization so the
 # number of public methods does not matter.
@@ -406,3 +407,42 @@ class TestStdin:
         msg = "Top line after search not as expected"
         top_line = terminal.get_string_at(0, 0, len(second_line))
         assert top_line == second_line, msg
+
+
+class TestHasStyleAt:
+    """Tests for Terminal.has_style_at."""
+
+    @pytest.mark.parametrize("terminal", [{"executable": "styles.sh"}], indirect=True)
+    @pytest.mark.parametrize("line, expected_style", [
+        (0, Style.BOLD),
+        (2, Style.ITALIC),
+        (3, Style.UNDERLINE),
+        (4, Style.BLINKING),
+        (5, Style.INVERSE),
+        (7, Style.STRIKETHROUGH),
+    ])
+    def test_returns_true_for_expected_style(self, terminal, line, expected_style):
+        """Verify that True is returned for the expected style at location."""
+        terminal.wait_for_stable_output()
+
+        msg = f"Expected style {expected_style}, did not find it"
+        assert terminal.has_style_at(expected_style, line, 0), msg
+
+    @pytest.mark.parametrize("terminal", [{"executable": "styles.sh"}], indirect=True)
+    @pytest.mark.parametrize("line, actual_style", [
+        (0, Style.BOLD),
+        (2, Style.ITALIC),
+        (3, Style.UNDERLINE),
+        (4, Style.BLINKING),
+        (5, Style.INVERSE),
+        (7, Style.STRIKETHROUGH),
+    ])
+    def test_does_not_return_true_for_unexpected_style(self, terminal, line, actual_style):
+        """Verify that True is not returned for unexpected styles."""
+        terminal.wait_for_stable_output()
+
+        unexpected_styles = (style for style in Style if style != actual_style)
+
+        for style in unexpected_styles:
+            msg = f"Got style {style} when not expecting it"
+            assert not terminal.has_style_at(style, line, 0), msg

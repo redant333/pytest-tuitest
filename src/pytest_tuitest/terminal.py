@@ -4,6 +4,8 @@ import time
 
 import pyte
 
+from pytest_tuitest.styles import Style
+
 from .colors import Color16
 from .process import Process, ProcessFinished
 
@@ -40,6 +42,15 @@ _PYTE_TO_COLOR_NAMED_MAP = {
     "brightcyan": Color16.BRIGHT_CYAN,
     "brightwhite": Color16.BRIGHT_WHITE,
     "default": Color16.DEFAULT,
+}
+
+_STYLE_PYTE_ATTRIBUTE_MAP = {
+    Style.BOLD: "bold",
+    Style.ITALIC: "italics",
+    Style.UNDERLINE: "underscore",
+    Style.BLINKING: "blink",
+    Style.INVERSE: "reverse",
+    Style.STRIKETHROUGH: "strikethrough",
 }
 
 
@@ -154,6 +165,20 @@ class Terminal:
 
         msg = f"Unrecognized color at line {line}, column {column}"
         raise UnrecognizedColor(msg)
+
+    def has_style_at(self, style: Style, line: int, column: int) -> bool:
+        """Check whether the given location is styled with the given style
+
+        Args:
+            style (Style): The style to check
+            line (int): The line at which to check the style
+            column (int): The column at which to check the style
+
+        Returns:
+            bool: True if the location has the given stylem, False otherwise.
+        """
+        attr = _STYLE_PYTE_ATTRIBUTE_MAP[style]
+        return self._get_attribute_at(line, column, attr)
 
     def wait_for_output(self) -> None:
         """Block until new output is received from the process."""
