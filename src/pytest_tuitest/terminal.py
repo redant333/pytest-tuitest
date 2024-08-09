@@ -126,7 +126,7 @@ class Terminal:
             column (int): The column at which to get the color.
 
         Returns:
-            (ColorNamed|str): Color at the given coordinates as a named color
+            (Color16|str): Color at the given coordinates as a named color
                 or a 6 digit hex string. Note that, due to limitations of the
                 used library, RGB colors cannot be distingquished from ANSI 256
                 colors and both are returned as RBG strings. Use Colors256 enum
@@ -150,7 +150,7 @@ class Terminal:
             column (int): The column at which to get the color.
 
         Returns:
-            (ColorNamed|str): Color at the given coordinates as a named color
+            (Color16|str): Color at the given coordinates as a named color
                 or a 6 digit hex string. Note that, due to limitations of the
                 used library, RGB colors cannot be distingquished from ANSI 256
                 colors and both are returned as RBG strings. Use Colors256 enum
