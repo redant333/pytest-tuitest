@@ -120,9 +120,6 @@ class Terminal:
                 used library, RGB colors cannot be distingquished from ANSI 256
                 colors and both are returned as RBG strings. Use Colors256 enum
                 to compare the returned string with ANSI 256 index.
-
-        Raises:
-            UnrecognizedColor: If a color at the given location cannot be decoded.
         """
         pyte_color = self._get_attribute_at(line, column, "fg")
 
@@ -147,9 +144,6 @@ class Terminal:
                 used library, RGB colors cannot be distingquished from ANSI 256
                 colors and both are returned as RBG strings. Use Colors256 enum
                 to compare the returned string with ANSI 256 index.
-
-        Raises:
-            UnrecognizedColor: If a color at the given location cannot be decoded.
         """
         pyte_color = self._get_attribute_at(line, column, "bg")
 
