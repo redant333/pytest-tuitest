@@ -67,6 +67,7 @@ class TuitestSetupException(Exception):
 # pylint: disable-next=too-many-arguments
 def terminal(tuitest_executable,
              tuitest_arguments,
+             tuitest_env,
              tuitest_capture_stdout,
              tuitest_capture_stderr,
              tuitest_stdin,
@@ -76,6 +77,7 @@ def terminal(tuitest_executable,
 
     process = Process(executable=tuitest_executable,
                       args=tuitest_arguments,
+                      additional_env=tuitest_env,
                       capture_stdout=tuitest_capture_stdout,
                       capture_stderr=tuitest_capture_stderr,
                       stdin=tuitest_stdin,
@@ -193,6 +195,20 @@ def fixture_terminal_size(request):
 
     return (80, 24)
 
+
+@pytest.fixture(name="tuitest_env")
+def fixture_tuitest_env(request):
+    """Fixture that determines the environment variables available to the process.
+
+    It can be parametrized by using with_env decorator or @pytest.mark.parametrize
+    with indirect flag. If it's not parametrized, only the default environment variables
+    will be used.
+    """
+    if hasattr(request, "param"):
+        return request.param
+
+    return None
+
 ###############################################################################
 # Decorators
 ###############################################################################
@@ -260,3 +276,13 @@ def with_terminal_size(columns: int, lines: int):
         lines (int): The number of lines in the virtual terminal.
     """
     return pytest.mark.parametrize("tuitest_terminal_size", [(columns, lines)], indirect=True)
+
+
+def with_env(env: dict[str, str]):
+    """Run the process with the provided environment variables.
+
+    Args:
+        env (dict[str, str]): The environment variables to be use with the
+            process. If a variable already exists, it will be overwritten.
+    """
+    return pytest.mark.parametrize("tuitest_env", [env], indirect=True)
