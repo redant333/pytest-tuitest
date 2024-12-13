@@ -6,10 +6,25 @@ import pty
 import struct
 import termios
 from select import select
+from typing import Union
 
 
 class ProcessFinished(Exception):
     """The process has finished finished."""
+
+
+def overlay_environment(env1: dict[str, str], env2:  Union[dict[str, str], None]) -> dict[str, str]:
+    """Join variables from env1 and env2 and return a new environment.
+
+    If a variable is present in both environments, the value from env2 will be used.
+    """
+    result_env = env1.copy()
+
+    if env2 is not None:
+        for name, value in env2.items():
+            result_env[name] = value
+
+    return result_env
 
 # The fact that columns and lines, as well as stdout and stderr, come in pairs
 # increases the neccessary number of arguments/attributes. At its present state,
@@ -23,6 +38,7 @@ class Process:  # pylint: disable=too-many-instance-attributes
     def __init__(self,
                  executable: str,
                  args: list[str] = None,
+                 additional_env: Union[dict[str, str]] = None,
                  columns: int = 80,
                  lines: int = 24,
                  stdin: bytes = None,
@@ -34,6 +50,10 @@ class Process:  # pylint: disable=too-many-instance-attributes
             executable (str): Executable to run. Must be either full path or present in path.
             args (list[str], optional): List of arguments to send to the process. If not provided
                 an empty list is used.
+            additional_env (dict[str, str], optional): If given, add these environment variables
+                to the environment of the process. By default, the environment contains only
+                $TERM=linux and variables $COLUMNS and $LINES set to the given terminal size.
+                If this argument contains any of those variables, they will be overwritten.
             columns (int, optional): Width of the pseudo terminal. Defaults to 80.
             lines (int, optional): Height of the pseudo terminal. Defaults to 24.
             capture_stdout (bool, optional): If this is set to true, stdout will not be returned
@@ -83,6 +103,7 @@ class Process:  # pylint: disable=too-many-instance-attributes
                 "COLUMNS": str(columns),
                 "LINES": str(lines),
             }
+            env = overlay_environment(env, additional_env)
 
             if stdin is not None:
                 stdin_r, stdin_w = os.pipe()

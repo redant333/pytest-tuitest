@@ -2,6 +2,7 @@
 import pytest
 
 from pytest_tuitest import Process, ProcessFinished
+from pytest_tuitest.process import overlay_environment
 
 
 def get_all_output(process: Process) -> bytes:
@@ -199,3 +200,59 @@ class TestProcess:
         exit_code, _, _ = process.wait_for_finished()
 
         assert exit_code == 0, "Process failed unexpectedly"
+
+    def test_given_environment_successfully_propagated(self):
+        """Verify that the given environment variables are accessible."""
+        process = Process("bash", ["-c", "echo -n $ARBITRARY_VAR"],
+                          additional_env={"ARBITRARY_VAR": "stuff"},
+                          capture_stdout=True)
+
+        exit_code, stdout, _ = process.wait_for_finished()
+
+        assert exit_code == 0, "Process failed unexpectedly"
+        assert stdout == b"stuff", "Expected the value of the given variable"
+
+    def test_given_environment_overwrites_defaults(self):
+        """Verify that the given environment variable overwrite the default ones."""
+        process = Process("bash", ["-c", "echo -n $TERM"],
+                          additional_env={"TERM": "dumb"},
+                          capture_stdout=True)
+
+        exit_code, stdout, _ = process.wait_for_finished()
+
+        assert exit_code == 0, "Process failed unexpectedly"
+        assert stdout == b"dumb", "Expected the value of the given variable"
+
+
+class TestOverlayEnvironment:
+    """Tests for overlay_environment."""
+
+    def test_returns_env1_if_env2_is_none(self):
+        """Verify that an unchanged equivalent of env1 is returned when env2 is None."""
+        env1 = {"A": "B", "C": "D"}
+
+        overlaid = overlay_environment(env1, None)
+
+        assert overlaid == env1, "Expected the environment not to change"
+
+    def test_returns_joined_values_when_there_is_no_overlap(self):
+        """Verify that the input environments are simply merged if there is no overlap."""
+        env1 = {"A": "B", "C": "D"}
+        env2 = {"E": "F", "G": "H"}
+
+        overlaid = overlay_environment(env1, env2)
+
+        msg = "Expected all entries from both environments in the output"
+        assert overlaid == {**env1, **env2}, msg
+
+    def test_overwrites_value_in_env1_when_it_exists_in_env2(self):
+        """Verify that values in env2 will overwrite the values in env1 when there is overlap."""
+        env1 = {"A": "B"}
+        env2 = {"A": "C"}
+
+        overlaid = overlay_environment(env1, env2)
+
+        assert len(overlaid) == 1, "Expected the size not to change"
+
+        msg = "Expected the value from env2 to overwrite the value from env1"
+        assert overlaid["A"] == env2["A"], msg
