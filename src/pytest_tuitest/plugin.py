@@ -236,8 +236,7 @@ def with_captured_stdout(capture_output: bool = True):
     Note: This is a decorator intended to be applied to a test function.
 
     Args:
-        capture_output (bool, optional): Whether the output should be captured. Defaults
-            to True.
+        capture_output: Whether the output should be captured.
     """
     return pytest.mark.parametrize("tuitest_capture_stdout", [capture_output], indirect=True)
 
@@ -249,8 +248,7 @@ def with_captured_stderr(capture_stderr: bool = True):
     Note: This is a decorator intended to be applied to a test function.
 
     Args:
-        capture_stderr (bool, optional): Whether the stderr output should be captured. Defaults
-            to True.
+        capture_stderr: Whether the stderr output should be captured.
     """
     return pytest.mark.parametrize("tuitest_capture_stderr", [capture_stderr], indirect=True)
 
@@ -261,7 +259,7 @@ def with_stdin(stdin: str):
     Note: This is a decorator intended to be applied to a test function.
 
     Args:
-        stdin (str): UTF8 encoded string to send to the executable
+        stdin: UTF8 encoded string to send to the executable
     """
     return pytest.mark.parametrize("tuitest_stdin", [stdin], indirect=True)
 
@@ -272,8 +270,8 @@ def with_terminal_size(columns: int, lines: int):
     Note: This is a decorator intended to be applied to a test function.
 
     Args:
-        columns (int): The number of columns in the virtual terminal.
-        lines (int): The number of lines in the virtual terminal.
+        columns: The number of columns in the virtual terminal.
+        lines: The number of lines in the virtual terminal.
     """
     return pytest.mark.parametrize("tuitest_terminal_size", [(columns, lines)], indirect=True)
 
@@ -282,7 +280,7 @@ def with_env(env: dict[str, str]):
     """Run the process with the provided environment variables.
 
     Args:
-        env (dict[str, str]): The environment variables to be use with the
-            process. If a variable already exists, it will be overwritten.
+        env: The environment variables to be use with the process.
+             If a variable already exists, it will be overwritten.
     """
     return pytest.mark.parametrize("tuitest_env", [env], indirect=True)

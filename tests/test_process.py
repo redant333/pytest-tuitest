@@ -9,10 +9,10 @@ def get_all_output(process: Process) -> bytes:
     """Read the process output until it finishes.
 
     Args:
-        process (Process): The process whose output should be read.
+        process: The process whose output should be read.
 
     Returns:
-        bytes: The read output.
+       The read output.
     """
     output = b""
 

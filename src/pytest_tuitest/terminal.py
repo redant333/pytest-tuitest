@@ -57,7 +57,7 @@ class Terminal:
         """Initialize a Terminal object.
 
         Args:
-            process (Process): The process to execute in this virtual terminal.
+            process: The process to execute in this virtual terminal.
         """
         self._screen = pyte.Screen(process.columns, process.lines)
         self._stream = pyte.ByteStream(self._screen)
@@ -71,16 +71,16 @@ class Terminal:
         one line. For locations without any text, this method uses a space character.
 
         Args:
-            line (int): Line where the string starts (zero indexed).
-            column (int): Column where the string starts (zero indexed).
-            length (int): Length of the string.
+            line: Line where the string starts (zero indexed).
+            column: Column where the string starts (zero indexed).
+            length: Length of the string.
 
         Raises:
             OutsideBounds: If the string is not completely located within the
                 terminal bounds.
 
         Returns:
-            str: The requested string.
+            The requested string.
         """
         # Check if any of the arguments are invalid
         column_start_outside = column < 0 or column >= self._process.columns
@@ -105,19 +105,19 @@ class Terminal:
 
         return "".join(chars)
 
-    def get_foreground_at(self, line: int, column: int) -> Color16:
+    def get_foreground_at(self, line: int, column: int) -> (Color16 | str):
         """Get the foreground color at given coordinates.
 
         Args:
-            line (int): The line at which to get the color.
-            column (int): The column at which to get the color.
+            line: The line at which to get the color.
+            column: The column at which to get the color.
 
         Returns:
-            (Color16|str): Color at the given coordinates as a named color
+                Color at the given coordinates as a named color
                 or a 6 digit hex string. Note that, due to limitations of the
-                used library, RGB colors cannot be distingquished from ANSI 256
-                colors and both are returned as RBG strings. Use Colors256 enum
-                to compare the returned string with ANSI 256 index.
+                underlying library, RGB colors cannot be distingquished from
+                ANSI 256 colors and both are returned as RBG strings. Use Colors256
+                enum to compare the returned string with ANSI 256 index.
         """
         pyte_color = self._get_attribute_at(line, column, "fg")
 
@@ -133,13 +133,13 @@ class Terminal:
         """Get the background color at given coordinates.
 
         Args:
-            line (int): The line at which to get the color.
-            column (int): The column at which to get the color.
+            line: The line at which to get the color.
+            column: The column at which to get the color.
 
         Returns:
-            (Color16|str): Color at the given coordinates as a named color
+                Color at the given coordinates as a named color
                 or a 6 digit hex string. Note that, due to limitations of the
-                used library, RGB colors cannot be distingquished from ANSI 256
+                underlying library, RGB colors cannot be distingquished from ANSI 256
                 colors and both are returned as RBG strings. Use Colors256 enum
                 to compare the returned string with ANSI 256 index.
         """
@@ -157,12 +157,12 @@ class Terminal:
         """Check whether the given location is styled with the given style
 
         Args:
-            style (Style): The style to check
-            line (int): The line at which to check the style
-            column (int): The column at which to check the style
+            style: The style to check
+            line: The line at which to check the style
+            column: The column at which to check the style
 
         Returns:
-            bool: True if the location has the given stylem, False otherwise.
+            True if the location has the given stylem, False otherwise.
         """
         attr = _STYLE_PYTE_ATTRIBUTE_MAP[style]
         return self._get_attribute_at(line, column, attr)
@@ -175,10 +175,10 @@ class Terminal:
         """Block until the process finishes and return the information about it.
 
         Args:
-            encoding (str): The encoding to be used to decode captured outputs.
+            encoding: The encoding to be used to decode captured outputs.
 
         Returns:
-            tuple[int, str, str]: A tuple with the following information about the process:
+            A tuple with the following information about the process:
                 - return code of the process
                 - captured stdout if stdout capturing is enabled, None otherwise
                 - captured stderr if stderr capturing is enabled, None otherwise
@@ -200,9 +200,9 @@ class Terminal:
         finished before continuing.
 
         Args:
-            stable_time_sec (float, optional): The terminal is considered stable
+            stable_time_sec: The terminal is considered stable
                 after it remains unchanged for this amount of time. Defaults to 0.1.
-            max_wait_sec (int, optional): Maximum amount of time to wait for the
+            max_wait_sec: Maximum amount of time to wait for the
                 terminal to become stable. Defaults to 5.
 
         Raises:
@@ -241,7 +241,7 @@ class Terminal:
         """Send the provided characters to the process's stdin.
 
         Args:
-            characters (str): The characters to send.
+            characters: The characters to send.
         """
         encoded = characters.encode()
         self._process.write(encoded)
@@ -250,7 +250,7 @@ class Terminal:
         """Refresh the internal knowledge about the process output.
 
         Returns:
-            (bool): True if the screen has changed, False otherwise.
+            True if the screen has changed, False otherwise.
         """
         screen_updated = False
 
