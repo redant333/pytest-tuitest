@@ -1,4 +1,6 @@
-"""Pytest plugin for testing TUI(Terminal User Interface) applications."""
+"""
+.. include:: ../../README.md
+"""
 
 __version__ = "0.1.0"
 
