@@ -7,7 +7,11 @@ It uses [pyte](https://github.com/selectel/pyte) for terminal emulation.
 
 # Installation
 
-Currently only available from the source. Coming to PyPI soon.
+```
+pip install pytest-tuitest
+```
+
+This will automatically install pytest as well.
 
 # What can it do?
 Here are some examples to give you a taste of what can be done.
