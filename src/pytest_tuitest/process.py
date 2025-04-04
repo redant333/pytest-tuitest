@@ -35,7 +35,7 @@ def overlay_environment(env1: dict[str, str], env2:  Union[dict[str, str], None]
 
 
 class Process:  # pylint: disable=too-many-instance-attributes
-    """A class repsesenting a process executing in a pseudo terminal."""
+    """A class representing a process executing in a pseudo terminal."""
 
     # pylint: disable-next=too-many-arguments
     def __init__(self,
@@ -53,20 +53,20 @@ class Process:  # pylint: disable=too-many-instance-attributes
             executable: Executable to run. Must be either full path or present in path.
             args: List of arguments to send to the process. If not provided an empty list is used.
             additional_env: If given, add these environment variables to the environment of the
-                process. By default, the environment contains only $TERM=linux and variables
-                $COLUMNS and $LINES set to the given terminal size. If this argument contains
+                process. By default, the environment contains only `$TERM=linux` and variables
+                `$COLUMNS` and `$LINES` set to the given terminal size. If this argument contains
                 any of those variables, they will be overwritten.
-            columns: Width of the pseudo terminal. Defaults to 80.
-            lines: Height of the pseudo terminal. Defaults to 24.
+            columns: Width of the pseudo terminal.
+            lines: Height of the pseudo terminal.
             capture_stdout: If this is set to true, stdout will not be returned as part of
-                get_new_output and will be captured instead. The captured output will
-                be available once the process finishes. See wait_for_finished.
+                `get_new_output` and will be captured instead. The captured output will
+                be available once the process finishes. See `wait_for_finished`.
                 Useful for testing applications that write on /dev/tty.
             stdin: The stdin to pipe to the process. Note that this not prevent the process from
                 reading from /dev/tty.
             capture_stderr: If this is set to true, stderr will not be returned
-                as part of get_new_output and will be captured instead. The captured output will
-                be available once the process finishes. See wait_for_finished.
+                as part of `get_new_output` and will be captured instead. The captured output will
+                be available once the process finishes. See `wait_for_finished`.
                 Useful for testing applications that write on /dev/tty.
         """
         if not args:
@@ -159,7 +159,7 @@ class Process:  # pylint: disable=too-many-instance-attributes
         """Get any output generated inside the terminal after the last call to this function.
 
         Args:
-            max_size: Maximum amount of data to return. Defaults to 1024.
+            max_size: Maximum amount of data to return.
 
         Raises:
             ProcessFinished: If the process has finished and there is no more output to read.
@@ -215,7 +215,7 @@ class Process:  # pylint: disable=too-many-instance-attributes
 
         Args:
             timeout_sec: If provided, maximuma amount of time
-            to wait for new output. Defaults to None.
+            to wait for new output.
 
         Returns:
             True if new output has been received, False otherwise. Note that

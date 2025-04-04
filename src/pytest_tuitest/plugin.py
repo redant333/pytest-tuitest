@@ -91,10 +91,10 @@ def fixture_tuitest_executable(request):
     """Fixture that defines the executable used in terminal fixture.
 
     The return value of this fixture is, in the order of priority, are:
-    - The value specified with test_executable decorator or @pytest.mark.parametrize
+    - The value specified with `test_executable` decorator or `@pytest.mark.parametrize`
       with indirect flag
-    - The value specified with command line option --tuitest-default-executable
-    - The value specified by using pytest.ini option tuitest-default-executable
+    - The value specified with command line option `--tuitest-default-executable`
+    - The value specified by using pytest.ini option `tuitest-default-executable`
 
     If the default executable is not specified in any of the listed ways, an exception
     is raised.
@@ -117,7 +117,7 @@ def fixture_tuitest_executable(request):
 def fixture_tuitest_arguments(request):
     """Fixture that defines the arguments sent to the executable used in terminal fixture.
 
-    It can be parametrized by using with_arguments decorator or @pytest.mark.parametrize
+    It can be parametrized by using `with_arguments` decorator or `@pytest.mark.parametrize`
     with indirect flag. If it's not parametrized, an empty argument list is used.
     """
     if hasattr(request, "param"):
@@ -133,9 +133,9 @@ def fixture_capture_stdout(request):
     If it's not captured, it will be displayed in the virtual terminal.
 
     The return value of this fixture is, in the order of priority, are:
-    - The value specified with with_captured_stdout decorator or @pytest.mark.parametrize
+    - The value specified with `with_captured_stdout` decorator or `@pytest.mark.parametrize`
       with indirect flag
-    - The value specified by using pytest.ini option tuitest-capture-stdout
+    - The value specified by using pytest.ini option `tuitest-capture-stdout`
     - False
     """
     if hasattr(request, "param"):
@@ -154,9 +154,9 @@ def fixture_capture_stderr(request):
     If it's not captured, it will be displayed in the virtual terminal.
 
     The return value of this fixture is, in the order of priority, are:
-    - The value specified with with_captured_stderr decorator or @pytest.mark.parametrize
+    - The value specified with `with_captured_stderr` decorator or `@pytest.mark.parametrize`
       with indirect flag
-    - The value specified by using pytest.ini option tuitest-capture-stderr
+    - The value specified by using pytest.ini option `tuitest-capture-stderr`
     - False
     """
     if hasattr(request, "param"):
@@ -172,7 +172,7 @@ def fixture_capture_stderr(request):
 def fixture_stdin(request):
     """Fixture that determines the stdin to be sent to the executable.
 
-    It can be parametrized by using with_stdin decorator or @pytest.mark.parametrize
+    It can be parametrized by using `with_stdin` decorator or `@pytest.mark.parametrize`
     with indirect flag. If it's not parametrized, no stdin will be sent to the executable.
     """
     if hasattr(request, "param"):
@@ -186,7 +186,7 @@ def fixture_terminal_size(request):
     """Fixture that determines the size of the instantiated virtual terminal.
 
     Its value is a tuple of the form (columns, lines) and it can be parametrized by
-    using with_terminal_size decorator or @pytest.mark.parametrize with indirect flag.
+    using `with_terminal_size` decorator or `@pytest.mark.parametrize` with indirect flag.
 
     If it's not parametrized, the terminal will be instantiated with size (80, 24)
     """
@@ -200,7 +200,7 @@ def fixture_terminal_size(request):
 def fixture_tuitest_env(request):
     """Fixture that determines the environment variables available to the process.
 
-    It can be parametrized by using with_env decorator or @pytest.mark.parametrize
+    It can be parametrized by using `with_env decorator` or `@pytest.mark.parametrize`
     with indirect flag. If it's not parametrized, only the default environment variables
     will be used.
     """
@@ -232,7 +232,9 @@ def with_arguments(args):
 def with_captured_stdout(capture_output: bool = True):
     """Capture stdout instead of showing it in the virtual terminal.
 
-    The captured stdout is available in the output of Terminal::wait_for_finished.
+    The captured stdout is available in the output of
+    `pytest_tuitest.terminal.Terminal.wait_for_finished`.
+
     Note: This is a decorator intended to be applied to a test function.
 
     Args:
@@ -244,7 +246,9 @@ def with_captured_stdout(capture_output: bool = True):
 def with_captured_stderr(capture_stderr: bool = True):
     """Capture stderr instead of showing it in the virtual terminal.
 
-    The captured stderr is available in the output of Terminal::wait_for_finished.
+    The captured stderr is available in the output of
+    `pytest_tuitest.terminal.Terminal.wait_for_finished`.
+
     Note: This is a decorator intended to be applied to a test function.
 
     Args:

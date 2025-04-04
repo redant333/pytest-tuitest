@@ -76,7 +76,7 @@ class Terminal:
             length: Length of the string.
 
         Raises:
-            OutsideBounds: If the string is not completely located within the
+            `OutsideBounds`: If the string is not completely located within the
                 terminal bounds.
 
         Returns:
@@ -116,8 +116,9 @@ class Terminal:
                 Color at the given coordinates as a named color
                 or a 6 digit hex string. Note that, due to limitations of the
                 underlying library, RGB colors cannot be distingquished from
-                ANSI 256 colors and both are returned as RBG strings. Use Colors256
-                enum to compare the returned string with ANSI 256 index.
+                ANSI 256 colors and both are returned as RBG strings. Use
+                `pytest_tuitest.colors.Color256` enum to compare the returned
+                string with ANSI 256 index.
         """
         pyte_color = self._get_attribute_at(line, column, "fg")
 
@@ -140,8 +141,8 @@ class Terminal:
                 Color at the given coordinates as a named color
                 or a 6 digit hex string. Note that, due to limitations of the
                 underlying library, RGB colors cannot be distingquished from ANSI 256
-                colors and both are returned as RBG strings. Use Colors256 enum
-                to compare the returned string with ANSI 256 index.
+                colors and both are returned as RBG strings. Use `pytest_tuitest.colors.Color256`
+                enum to compare the returned string with ANSI 256 index.
         """
         pyte_color = self._get_attribute_at(line, column, "bg")
 
@@ -179,9 +180,10 @@ class Terminal:
 
         Returns:
             A tuple with the following information about the process:
-                - return code of the process
-                - captured stdout if stdout capturing is enabled, None otherwise
-                - captured stderr if stderr capturing is enabled, None otherwise
+
+            - return code of the process
+            - captured stdout if stdout capturing is enabled, None otherwise
+            - captured stderr if stderr capturing is enabled, None otherwise
         """
         (status, stdout, stderr) = self._process.wait_for_finished()
 
@@ -206,7 +208,7 @@ class Terminal:
                 terminal to become stable. Defaults to 5.
 
         Raises:
-            TimedOut: When the terminal doesn't stabilize within max_wait_sec.
+            `TimedOut`: When the terminal doesn't stabilize within max_wait_sec.
         """
         self._update_screen()
         started = time.time()
