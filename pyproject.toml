@@ -34,8 +34,8 @@ dev = [
 ]
 
 [project.urls]
-Home = "https://github.com/redant333/pytest-tuitest"
 Source = "https://github.com/redant333/pytest-tuitest"
+Documentation = "https://redant333.github.io/pytest-tuitest/"
 
 [project.entry-points.pytest11]
 pytest_tuitest = "pytest_tuitest.plugin"
