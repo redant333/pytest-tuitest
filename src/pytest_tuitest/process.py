@@ -1,4 +1,7 @@
-"""Classes for handling and communication with processes in pseudo terminals."""
+"""Classes for handling and communication with processes in pseudo terminals.
+@private This is an implementation detail and shouldn't be included in the top
+         level of generated documentation.
+"""
 import errno
 import fcntl
 import os
