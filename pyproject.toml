@@ -6,6 +6,7 @@ build-backend = "flit_core.buildapi"
 name = "pytest-tuitest"
 authors = [{name = "Milomir Babic (redant333)"}]
 license = {file = "LICENSE"}
+readme = "README.md"
 keywords = [
   "pytest",
   "tui",
