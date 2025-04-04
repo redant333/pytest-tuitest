@@ -1,4 +1,44 @@
-"""The main plugin file containing all the fixtures."""
+"""This module contains all the pytest fixtures, decorators and options.
+
+The main fixture, that is requested in tests, is `terminal`.
+It depends on the other fixtures in this module and customizing them allows you
+to customize the terminal environment in which your process will run.
+
+# Fixtures vs Decorators
+
+Each of the fixtures can be customized either by using the corresponding decorators
+or by using `pytest.mark.parametrize` with the indirect flag:
+
+```python
+        @tt.with_terminal_size(21, 22)
+        def test_foo(terminal):
+```
+
+```python
+        @pytest.mark.parametrize("tuitest_terminal_size", indirect=True, argvalues=[
+            (21, 22),
+            (23, 24),
+        ])
+        def test_foo(terminal):
+```
+
+Decorators are more convenient when there is only one input, while `pytest.mark.parametrize`
+is more convenient when you want to parametrize the test, i.e. run the same test with multiple
+different inputs.
+
+# Specifying fixture values globally
+
+Values for some of the fixtures can be specified once in `pytest.ini` or in a command-line argument
+and you don't need to specify them in your tests.
+
+For example, your whole project will likely test the same executable and, in order to avoid putting
+`test_executable` everywhere, you can just put
+`tuitest-default-executable = /path/to/your/executable` in `pytest.ini`.
+Explicit `test_executable` will still override this value when that is needed.
+
+The fixtures that allow setting the value through `pytest.ini` option or command-line argument
+have a note in their documentation with the details.
+"""
 
 import pytest
 
@@ -10,7 +50,7 @@ _STDERR_CAPTURE_PARAM = "tuitest-capture-stderr"
 
 
 def addoption_executable(parser):
-    """Add ini and command line options for specifying default executable."""
+    """@private Add ini and command line options for specifying default executable."""
     help_text = "Executable to be used for tests when the executable isn't explicitly specified."
 
     parser.addini(
@@ -27,7 +67,7 @@ def addoption_executable(parser):
 
 
 def addoption_stdout_capture(parser):
-    """Add ini option for specifying whether stdout should be captured by default."""
+    """@private Add ini option for specifying whether stdout should be captured by default."""
     parser.addini(
         name=_STDOUT_CAPTURE_PARAM,
         type="bool",
@@ -37,7 +77,7 @@ def addoption_stdout_capture(parser):
 
 
 def addoption_stderr_capture(parser):
-    """Add ini option for specifying whether stderr should be captured by default."""
+    """@private Add ini option for specifying whether stderr should be captured by default."""
     parser.addini(
         name=_STDERR_CAPTURE_PARAM,
         type="bool",
@@ -47,14 +87,14 @@ def addoption_stderr_capture(parser):
 
 
 def pytest_addoption(parser):
-    """Add tuitest-specific options."""
+    """@private Add tuitest-specific options."""
     addoption_executable(parser)
     addoption_stdout_capture(parser)
     addoption_stderr_capture(parser)
 
 
 class TuitestSetupException(Exception):
-    """Raised when terminal fixture cannot be created."""
+    """@private Raised when terminal fixture cannot be created."""
 
 ###############################################################################
 # Fixtures
@@ -71,7 +111,7 @@ def terminal(tuitest_executable,
              tuitest_capture_stdout,
              tuitest_capture_stderr,
              tuitest_stdin,
-             tuitest_terminal_size):
+             tuitest_terminal_size) -> Terminal:
     """The main fixture that enables terminal interaction."""
     columns, lines = tuitest_terminal_size
 
@@ -208,13 +248,12 @@ def fixture_tuitest_env(request):
         return request.param
 
     return None
-
 ###############################################################################
 # Decorators
 ###############################################################################
 
 
-def test_executable(executable):
+def test_executable(executable: str):
     """Use this executable for the test.
 
     Note: This is a decorator intended to be applied to a test function.
@@ -222,7 +261,7 @@ def test_executable(executable):
     return pytest.mark.parametrize("tuitest_executable", [executable], indirect=True)
 
 
-def with_arguments(args):
+def with_arguments(args: list[str]):
     """Send these arguments to the executable.
 
     Note: This is a decorator intended to be applied to a test function."""
