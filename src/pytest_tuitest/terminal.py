@@ -9,19 +9,6 @@ from pytest_tuitest.styles import Style
 from .colors import Color16
 from .process import Process, ProcessFinished
 
-
-class OutsideBounds(Exception):
-    """Raised when information is requested for invalid coordinates."""
-
-
-class TimedOut(Exception):
-    """Raised when an operation times out."""
-
-
-class UnrecognizedColor(Exception):
-    """Raised when a color cannot be decoded."""
-
-
 _PYTE_TO_COLOR_NAMED_MAP = {
     "black": Color16.BLACK,
     "red": Color16.RED,
@@ -311,3 +298,15 @@ class Terminal:
         print(*self._screen.display, sep='\n')
         print('-' * self._process.columns)
         print()
+
+
+class OutsideBounds(Exception):
+    """Raised when information is requested for invalid coordinates."""
+
+
+class TimedOut(Exception):
+    """Raised when an operation times out."""
+
+
+class UnrecognizedColor(Exception):
+    """Raised when a color cannot be decoded."""
