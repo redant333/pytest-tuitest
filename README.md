@@ -5,14 +5,6 @@ pytest_tuitest is a [pytest](https://pytest.org) plugin for testing TUI (text/te
 It allows you to run an application in a virtual terminal and run assertions on the contents and colors of its output.
 It uses [pyte](https://github.com/selectel/pyte) for terminal emulation.
 
-# Installation
-
-```
-pip install pytest-tuitest
-```
-
-This will automatically install pytest as well.
-
 # What can it do?
 Here are some examples to give you a taste of what can be done.
 
@@ -60,3 +52,11 @@ def test_sending_input_and_capturing_output(terminal):
     assert status == 0
     assert stdout == "things\n"
 ```
+
+# Installation
+
+```
+pip install pytest-tuitest
+```
+
+This will automatically install pytest as well.
