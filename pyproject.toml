@@ -7,6 +7,7 @@ name = "pytest-tuitest"
 authors = [{name = "Milomir Babic (redant333)"}]
 license = {file = "LICENSE"}
 readme = "README.md"
+description = "pytest plugin for testing TUI and regular command-line applications."
 keywords = [
   "pytest",
   "tui",
@@ -24,7 +25,7 @@ dependencies = [
   "pytest>=7.4.0",
   "pyte>=0.8.1",
 ]
-dynamic = ["version", "description"]
+dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [

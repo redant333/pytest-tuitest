@@ -3,7 +3,6 @@
 """
 
 __version__ = "0.1.0"
-__description__ = "pytest plugin for testing TUI and regular command-line applications."
 
 from .colors import Color16, Color256
 from .plugin import (test_executable, with_arguments, with_captured_stderr,
