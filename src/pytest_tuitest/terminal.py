@@ -81,7 +81,7 @@ class Terminal:
         """Get the string of given length at the given coordiantes in the terminal.
 
         This method only supports getting a string that is completely located on
-        one line. For locations without any text, this method uses ' '.
+        one line. For locations without any text, this method uses a space character.
 
         Args:
             line (int): Line where the string starts (zero indexed).
